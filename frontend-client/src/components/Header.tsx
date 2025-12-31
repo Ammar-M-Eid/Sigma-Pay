@@ -63,7 +63,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, userId }) => {
 
 const styles: { [key: string]: React.CSSProperties } = {
   header: {
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    background: 'linear-gradient(135deg, #646cff 0%, #535bf2 100%)',
     color: 'white',
     padding: '16px 0',
     boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
@@ -133,7 +133,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   navButtonActive: {
     padding: '8px 14px',
     background: 'white',
-    color: '#667eea',
+    color: '#646cff',
     border: 'none',
     borderRadius: '6px',
     cursor: 'pointer',

@@ -59,7 +59,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     minHeight: '100vh',
     display: 'flex',
     flexDirection: 'column',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    background: 'linear-gradient(135deg, #646cff 0%, #535bf2 100%)',
     backgroundAttachment: 'fixed',
   },
   main: {
@@ -67,7 +67,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     paddingBottom: '80px',
   },
   footer: {
-    background: 'linear-gradient(135deg, #2d3748 0%, #1a202c 100%)',
+    background: 'linear-gradient(135deg, #1f2937 0%, #111827 100%)',
     color: 'white',
     padding: '30px 20px',
     textAlign: 'center',

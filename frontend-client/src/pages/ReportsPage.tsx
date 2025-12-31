@@ -77,7 +77,7 @@ const ReportsPage: React.FC<ReportsPageProps> = ({ userId }) => {
               data={spendingData}
               title="Weekly Spending Trend"
               dataKey="value"
-              color="#667eea"
+              color="#646cff"
             />
           </div>
         )}
@@ -88,7 +88,7 @@ const ReportsPage: React.FC<ReportsPageProps> = ({ userId }) => {
               data={incomeData}
               title="Income Sources"
               dataKey="value"
-              color="#764ba2"
+              color="#535bf2"
             />
           </div>
         )}
@@ -202,13 +202,13 @@ const styles: { [key: string]: React.CSSProperties } = {
   button: {
     padding: '12px 24px',
     fontSize: '15px',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    background: 'linear-gradient(135deg, #646cff 0%, #535bf2 100%)',
     color: 'white',
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
     fontWeight: '600',
-    boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+    boxShadow: '0 4px 15px rgba(100, 108, 255, 0.4)',
     transition: 'all 0.3s ease',
   },
   reportCard: {
@@ -217,7 +217,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     background: 'white',
     borderRadius: '12px',
     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-    border: 'left 4px solid #667eea',
+    borderLeft: '4px solid #646cff',
   },
   reportTitle: {
     fontSize: '18px',

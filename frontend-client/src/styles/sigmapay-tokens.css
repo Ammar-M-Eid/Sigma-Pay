@@ -1,0 +1,298 @@
+/**
+ * Sigmapay Design System Tokens
+ * 
+ * This file contains the visual theme tokens adapted from Ammar-M-Eid/Sigmapay
+ * including colors, animations, typography, and component styles.
+ */
+
+/* ============================================
+   COLOR TOKENS
+   ============================================ */
+:root {
+  /* Primary Colors - from Sigmapay theme */
+  --color-primary: #646cff;
+  --color-secondary: #535bf2;
+  
+  /* Background Colors */
+  --color-background: #f9fafb;
+  --color-card-bg: #ffffff;
+  
+  /* Text Colors */
+  --color-text-primary: #1f2937;
+  --color-text-secondary: #6b7280;
+  --color-text-tertiary: #9ca3af;
+  
+  /* Border Colors */
+  --color-border: #e5e7eb;
+  --color-border-light: #d1d5db;
+  --color-border-focus: var(--color-primary);
+  
+  /* State Colors */
+  --color-success: #22543d;
+  --color-success-bg: #c6f6d5;
+  --color-error: #742a2a;
+  --color-error-bg: #fed7d7;
+  --color-warning: #744210;
+  --color-warning-bg: #feebc8;
+  --color-info: #2c5282;
+  --color-info-bg: #bee3f8;
+  
+  /* Logo & Branding */
+  --color-logo-bg: #4F46E5;
+  
+  /* Shadow Colors */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 10px 30px rgba(0, 0, 0, 0.2);
+  --shadow-primary: 0 4px 15px rgba(100, 108, 255, 0.4);
+  
+  /* Focus Ring */
+  --focus-ring: 0 0 0 3px rgba(100, 108, 255, 0.1);
+}
+
+/* ============================================
+   TYPOGRAPHY TOKENS
+   ============================================ */
+:root {
+  --font-family-base: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --font-family-mono: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+  
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.875rem;   /* 14px */
+  --font-size-base: 1rem;     /* 16px */
+  --font-size-lg: 1.125rem;   /* 18px */
+  --font-size-xl: 1.25rem;    /* 20px */
+  --font-size-2xl: 1.5rem;    /* 24px */
+  --font-size-3xl: 1.875rem;  /* 30px */
+  --font-size-4xl: 2.25rem;   /* 36px */
+  
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+}
+
+/* ============================================
+   SPACING TOKENS
+   ============================================ */
+:root {
+  --spacing-xs: 0.25rem;   /* 4px */
+  --spacing-sm: 0.5rem;    /* 8px */
+  --spacing-md: 0.75rem;   /* 12px */
+  --spacing-lg: 1rem;      /* 16px */
+  --spacing-xl: 1.5rem;    /* 24px */
+  --spacing-2xl: 2rem;     /* 32px */
+  --spacing-3xl: 3rem;     /* 48px */
+  
+  --border-radius-sm: 0.5rem;   /* 8px */
+  --border-radius-md: 0.75rem;  /* 12px */
+  --border-radius-lg: 1rem;     /* 16px */
+}
+
+/* ============================================
+   ANIMATION KEYFRAMES (from Sigmapay tailwind.config.js)
+   ============================================ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes blob {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(20px, -50px) scale(1.1);
+  }
+  50% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  75% {
+    transform: translate(50px, 50px) scale(1.05);
+  }
+}
+
+/* ============================================
+   ANIMATION UTILITIES
+   ============================================ */
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-in-out;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.5s ease-in-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.5s ease-in-out;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.5s ease-in-out;
+}
+
+.animate-bounce-slow {
+  animation: bounce 3s infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse 3s infinite;
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+/* ============================================
+   COMPONENT UTILITY CLASSES (from Sigmapay src/index.css)
+   ============================================ */
+
+/* Primary Button */
+.btn-primary {
+  padding: 0.5rem 1rem;
+  background-color: var(--color-primary);
+  color: white;
+  border-radius: var(--border-radius-sm);
+  transition: background-color 0.3s;
+  border: none;
+  cursor: pointer;
+  font-weight: var(--font-weight-semibold);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-secondary);
+}
+
+.btn-primary:focus {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Input Field */
+.input-field {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--border-radius-sm);
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  transition: all 0.3s ease;
+  background-color: var(--color-card-bg);
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--color-border-focus);
+  box-shadow: var(--focus-ring);
+}
+
+.input-field::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+/* Card Component */
+.card {
+  background: var(--color-card-bg);
+  padding: 1.5rem;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.card-elevated {
+  box-shadow: var(--shadow-xl);
+}
+
+/* Text Utilities */
+.text-primary {
+  color: var(--color-primary);
+}
+
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+
+.text-muted {
+  color: var(--color-text-tertiary);
+}
+
+/* Border Utilities */
+.border-primary {
+  border-color: var(--color-primary);
+}
+
+/* Background Utilities */
+.bg-primary {
+  background-color: var(--color-primary);
+}
+
+.bg-secondary {
+  background-color: var(--color-secondary);
+}
+
+.bg-card {
+  background-color: var(--color-card-bg);
+}

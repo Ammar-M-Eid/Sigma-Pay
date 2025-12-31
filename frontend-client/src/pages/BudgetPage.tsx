@@ -143,7 +143,7 @@ const BudgetPage: React.FC<BudgetPageProps> = ({ userId }) => {
             data={budgetChartData}
             title="Budget Allocation vs Actual Spending"
             dataKey="allocated"
-            color="#667eea"
+            color="#646cff"
           />
         </div>
       )}
@@ -333,7 +333,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     marginBottom: '24px',
     fontSize: '22px',
     fontWeight: '600',
-    borderBottom: '3px solid #667eea',
+    borderBottom: '3px solid #646cff',
     paddingBottom: '10px',
     marginTop: 0,
   },
@@ -386,13 +386,13 @@ const styles: { [key: string]: React.CSSProperties } = {
   button: {
     padding: '14px',
     fontSize: '16px',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    background: 'linear-gradient(135deg, #646cff 0%, #535bf2 100%)',
     color: 'white',
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
     fontWeight: '600',
-    boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+    boxShadow: '0 4px 15px rgba(100, 108, 255, 0.4)',
     transition: 'all 0.3s ease',
   },
   message: {

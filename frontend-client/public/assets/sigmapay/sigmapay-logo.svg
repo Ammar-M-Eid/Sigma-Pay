@@ -1,0 +1,18 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="200" height="200" rx="20" fill="#4F46E5"/>
+  
+  <!-- Sigma Symbol (Σ) in white -->
+  <path d="M60 50 L140 50 L100 100 L140 150 L60 150 L60 130 L110 130 L80 100 L110 70 L60 70 Z" 
+        fill="white" 
+        stroke="white" 
+        stroke-width="2"/>
+  
+  <!-- Pay text -->
+  <text x="100" y="180" 
+        font-family="Inter, system-ui, sans-serif" 
+        font-size="24" 
+        font-weight="bold" 
+        fill="white" 
+        text-anchor="middle">Pay</text>
+</svg>
