@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Additional Test Cases for Payments, Reports, Profile, Groups, Notifications
  */
-public class PaymentsTests extends BaseTest {
+public class AllPagesTests extends BaseTest {
     private PaymentsPage paymentsPage;
     
     @BeforeMethod(groups = {"regression"})

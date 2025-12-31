@@ -34,11 +34,7 @@
             <class name="com.sigmapay.tests.AuthenticationTests"/>
             <class name="com.sigmapay.tests.BudgetTests"/>
             <class name="com.sigmapay.tests.GoalsTests"/>
-            <class name="com.sigmapay.tests.PaymentsTests"/>
-            <class name="com.sigmapay.tests.ReportsTests"/>
-            <class name="com.sigmapay.tests.GroupSavingsTests"/>
-            <class name="com.sigmapay.tests.NotificationsTests"/>
-            <class name="com.sigmapay.tests.ProfileTests"/>
+            <class name="com.sigmapay.tests.AllPagesTests"/>
         </classes>
     </test>
     

@@ -121,4 +121,9 @@ public abstract class BasePage {
     private void waitForElementClickable(WebElement element) {
         wait.until(ExpectedConditions.elementToBeClickable(element));
     }
+    
+    // Public getter for driver (needed for advanced test operations)
+    public WebDriver getDriver() {
+        return driver;
+    }
 }

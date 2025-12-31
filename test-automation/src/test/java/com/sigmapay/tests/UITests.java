@@ -20,7 +20,7 @@ public class UITests extends BaseTest {
         loginPage.openLoginPage();
         
         // Verify page title
-        WebDriver driver = loginPage.driver;
+        WebDriver driver = loginPage.getDriver();
         assertThat(driver.getTitle())
                 .as("Page title should be correct")
                 .contains("SigmaPay");

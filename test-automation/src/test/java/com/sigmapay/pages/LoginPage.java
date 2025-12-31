@@ -52,11 +52,10 @@ public class LoginPage extends BasePage {
         return new DashboardPage();
     }
     
-    public LoginPage login(String email, String password) {
+    public DashboardPage login(String email, String password) {
         enterEmail(email);
         enterPassword(password);
-        clickSignIn();
-        return this;
+        return clickSignIn();
     }
     
     public RegisterPage clickCreateAccount() {
