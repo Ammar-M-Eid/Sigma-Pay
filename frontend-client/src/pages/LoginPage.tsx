@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import apiClient from '../api/apiClient';
 
 interface LoginPageProps {
   onLoginSuccess: (userId: string) => void;
