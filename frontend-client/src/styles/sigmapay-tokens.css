@@ -40,15 +40,28 @@
   /* Logo & Branding */
   --color-logo-bg: #4F46E5;
   
-  /* Shadow Colors */
+  /* Shadow Colors - Enhanced for depth */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 10px 30px rgba(0, 0, 0, 0.2);
+  --shadow-2xl: 0 20px 40px rgba(0, 0, 0, 0.15);
   --shadow-primary: 0 4px 15px rgba(100, 108, 255, 0.4);
+  --shadow-primary-lg: 0 8px 25px rgba(100, 108, 255, 0.5);
+  --shadow-glow: 0 0 20px rgba(100, 108, 255, 0.3);
   
   /* Focus Ring */
   --focus-ring: 0 0 0 3px rgba(100, 108, 255, 0.1);
+  
+  /* Glassmorphism Effects */
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-blur: blur(12px);
+  
+  /* Gradient Overlays */
+  --gradient-primary: linear-gradient(135deg, #646cff 0%, #535bf2 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #535bf2 0%, #4248d9 100%);
+  --gradient-accent: linear-gradient(135deg, rgba(100, 108, 255, 0.1) 0%, rgba(83, 91, 242, 0.05) 100%);
 }
 
 /* ============================================
@@ -206,64 +219,107 @@
    COMPONENT UTILITY CLASSES (from Sigmapay src/index.css)
    ============================================ */
 
-/* Primary Button */
+/* Primary Button - Enhanced */
 .btn-primary {
   padding: 0.5rem 1rem;
-  background-color: var(--color-primary);
+  background: var(--gradient-primary);
   color: white;
   border-radius: var(--border-radius-sm);
-  transition: background-color 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: none;
   cursor: pointer;
   font-weight: var(--font-weight-semibold);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-primary);
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
 }
 
 .btn-primary:hover {
-  background-color: var(--color-secondary);
+  background: var(--gradient-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-primary-lg);
+}
+
+.btn-primary:hover::before {
+  left: 100%;
+}
+
+.btn-primary:active {
+  transform: translateY(0);
 }
 
 .btn-primary:focus {
   outline: none;
-  box-shadow: var(--focus-ring);
+  box-shadow: var(--focus-ring), var(--shadow-primary);
 }
 
 .btn-primary:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
-/* Input Field */
+/* Input Field - Enhanced */
 .input-field {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid var(--color-border-light);
+  border: 2px solid var(--color-border-light);
   border-radius: var(--border-radius-sm);
   font-family: inherit;
   font-size: var(--font-size-base);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background-color: var(--color-card-bg);
+}
+
+.input-field:hover {
+  border-color: var(--color-border);
 }
 
 .input-field:focus {
   outline: none;
   border-color: var(--color-border-focus);
   box-shadow: var(--focus-ring);
+  transform: translateY(-1px);
 }
 
 .input-field::placeholder {
   color: var(--color-text-tertiary);
 }
 
-/* Card Component */
+/* Card Component - Enhanced with glassmorphism */
 .card {
-  background: var(--color-card-bg);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
   padding: 1.5rem;
   border-radius: var(--border-radius-md);
   box-shadow: var(--shadow-md);
+  border: 1px solid var(--glass-border);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
 }
 
 .card-elevated {
   box-shadow: var(--shadow-xl);
+  background: var(--color-card-bg);
+}
+
+.card-elevated:hover {
+  box-shadow: var(--shadow-2xl);
 }
 
 /* Text Utilities */
