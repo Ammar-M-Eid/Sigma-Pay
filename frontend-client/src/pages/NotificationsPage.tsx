@@ -248,7 +248,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   notificationType: {
     fontWeight: '600',
-    color: '#673AB7',
+    color: '#646cff',
     textTransform: 'capitalize',
     fontSize: '16px',
   },
@@ -275,10 +275,10 @@ const styles: { [key: string]: React.CSSProperties } = {
     padding: '6px 12px',
     fontSize: '12px',
     borderRadius: '20px',
-    background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)',
+    background: 'linear-gradient(135deg, #646cff 0%, #535bf2 100%)',
     color: 'white',
     fontWeight: '600',
-    boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+    boxShadow: '0 2px 8px rgba(100, 108, 255, 0.3)',
   },
   emptyMessage: {
     textAlign: 'center',
