@@ -164,7 +164,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     marginBottom: '24px',
     fontSize: '22px',
     fontWeight: '600',
-    borderBottom: '3px solid #673AB7',
+    borderBottom: '3px solid #646cff',
     paddingBottom: '10px',
   },
   form: {
@@ -193,7 +193,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     width: '22px',
     height: '22px',
     cursor: 'pointer',
-    accentColor: '#673AB7',
+    accentColor: '#646cff',
   },
   input: {
     width: '100%',
@@ -208,14 +208,14 @@ const styles: { [key: string]: React.CSSProperties } = {
   button: {
     padding: '16px',
     fontSize: '17px',
-    background: 'linear-gradient(135deg, #673AB7 0%, #512DA8 100%)',
+    background: 'linear-gradient(135deg, #646cff 0%, #535bf2 100%)',
     color: 'white',
     border: 'none',
     borderRadius: '10px',
     cursor: 'pointer',
     marginTop: '12px',
     fontWeight: '600',
-    boxShadow: '0 4px 15px rgba(103, 58, 183, 0.4)',
+    boxShadow: '0 4px 15px rgba(100, 108, 255, 0.4)',
   },
   message: {
     marginTop: '24px',
