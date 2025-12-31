@@ -13,8 +13,8 @@ buildNumber.properties
 # Test Reports
 test-reports/
 test-output/
-*.html
-*.xml
+**/test-reports/*.html
+**/test-output/*.xml
 
 # Screenshots
 screenshots/
