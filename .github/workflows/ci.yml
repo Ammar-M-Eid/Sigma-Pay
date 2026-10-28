@@ -43,22 +43,20 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/metadata-action@v5
-        id: meta
-        with:
-          images: |
-            ghcr.io/${{ github.repository_owner }}/sigmapay-backend
-            ghcr.io/${{ github.repository_owner }}/sigmapay-frontend
-          tags: |
-            type=sha
-            type=raw,value=latest
+      - name: Set lowercase image namespace
+        id: image
+        run: echo "namespace=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
       - uses: docker/build-push-action@v6
         with:
           context: ./backend-server
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/sigmapay-backend:latest,ghcr.io/${{ github.repository_owner }}/sigmapay-backend:sha-${{ github.sha }}
+          tags: |
+            ${{ steps.image.outputs.namespace }}/sigmapay-backend:latest
+            ${{ steps.image.outputs.namespace }}/sigmapay-backend:sha-${{ github.sha }}
       - uses: docker/build-push-action@v6
         with:
           context: ./frontend-client
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/sigmapay-frontend:latest,ghcr.io/${{ github.repository_owner }}/sigmapay-frontend:sha-${{ github.sha }}
+          tags: |
+            ${{ steps.image.outputs.namespace }}/sigmapay-frontend:latest
+            ${{ steps.image.outputs.namespace }}/sigmapay-frontend:sha-${{ github.sha }}
