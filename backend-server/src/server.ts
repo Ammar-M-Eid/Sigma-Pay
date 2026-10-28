@@ -1,5 +1,6 @@
 import express, { Application } from 'express';
 import cors from 'cors';
+import { getSupabase, hasSupabaseConfig } from './config/supabase';
 import { Controller, createApiRouter } from './api/controller';
 import {
   AccountService,
@@ -22,20 +23,20 @@ import {
   DatabaseConnectionPool,
 } from './data/repositories';
 
-const PORT = 3001;
+const PORT = Number(process.env.PORT ?? 3001);
 
 // Initialize the application following the layered architecture
 function initializeApp(): Application {
   const app = express();
 
   // Middleware
-  app.use(cors());
+  app.use(cors({ origin: process.env.CORS_ORIGIN?.split(',') ?? '*', credentials: true }));
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
   // PATTERN: Singleton - Initialize DatabaseConnectionPool
   const dbPool = DatabaseConnectionPool.getInstance();
-  console.log('Database connection pool initialized');
+  console.log(`Database connection pool initialized (${hasSupabaseConfig() ? 'Supabase' : 'memory fallback'})`);
 
   // DATA LAYER - Initialize Repositories (in-memory mock)
   const accountsRepository = new AccountsRepositoryImpl();
@@ -78,8 +79,18 @@ function initializeApp(): Application {
   app.use('/api', apiRouter);
 
   // Health check endpoint
-  app.get('/health', (req, res) => {
-    res.json({ status: 'ok', message: 'SigmaPay backend is running' });
+  app.get('/health', async (req, res) => {
+    if (!hasSupabaseConfig()) {
+      res.json({ status: 'ok', database: 'not configured', message: 'SigmaPay backend is running' });
+      return;
+    }
+
+    const { error } = await getSupabase().from('User').select('id').limit(1);
+    if (error) {
+      res.status(503).json({ status: 'degraded', database: 'unavailable', message: error.message });
+      return;
+    }
+    res.json({ status: 'ok', database: 'supabase', message: 'SigmaPay backend is running' });
   });
 
   console.log('API routes registered');

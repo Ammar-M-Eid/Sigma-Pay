@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            backend-server/package-lock.json
+            frontend-client/package-lock.json
+      - name: Build backend
+        working-directory: backend-server
+        run: npm ci && npm run build
+      - name: Build frontend
+        working-directory: frontend-client
+        run: npm ci && npm run build
+      - name: Build container images
+        run: docker compose build
+
+  publish:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: |
+            ghcr.io/${{ github.repository_owner }}/sigmapay-backend
+            ghcr.io/${{ github.repository_owner }}/sigmapay-frontend
+          tags: |
+            type=sha
+            type=raw,value=latest
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./backend-server
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/sigmapay-backend:latest,ghcr.io/${{ github.repository_owner }}/sigmapay-backend:sha-${{ github.sha }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./frontend-client
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/sigmapay-frontend:latest,ghcr.io/${{ github.repository_owner }}/sigmapay-frontend:sha-${{ github.sha }}
