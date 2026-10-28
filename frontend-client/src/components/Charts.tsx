@@ -41,13 +41,13 @@ interface PieChartComponentProps {
   dataKey: string;
 }
 
-const COLORS = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe', '#43e97b'];
+const COLORS = ['#087f77', '#e68a48', '#4f7180', '#b8a36a', '#8d79a5', '#6b9b8b'];
 
 export const LineChartComponent: React.FC<LineChartComponentProps> = ({
   data,
   title,
   dataKey,
-  color = '#667eea',
+  color = '#087f77',
 }) => {
   return (
     <div style={styles.chartContainer}>
@@ -83,7 +83,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
   data,
   title,
   dataKey,
-  color = '#764ba2',
+  color = '#e68a48',
 }) => {
   return (
     <div style={styles.chartContainer}>
@@ -150,7 +150,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   chartTitle: {
     fontSize: '18px',
     fontWeight: '600',
-    color: '#2d3748',
+    color: '#17212b',
     marginBottom: '20px',
     margin: '0 0 20px 0',
   },
