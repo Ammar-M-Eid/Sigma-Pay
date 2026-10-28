@@ -21,7 +21,7 @@ const BudgetPage: React.FC<BudgetPageProps> = ({ userId }) => {
   const [expenseErrors, setExpenseErrors] = useState<{ [key: string]: string }>({});
 
   // Mock budget data for chart
-  const [budgetChartData, setBudgetChartData] = useState<ChartDataPoint[]>([
+  const [budgetChartData] = useState<ChartDataPoint[]>([
     { name: 'Food', value: 300, allocated: 300, spent: 280 },
     { name: 'Transport', value: 150, allocated: 150, spent: 120 },
     { name: 'Entertainment', value: 200, allocated: 200, spent: 180 },
