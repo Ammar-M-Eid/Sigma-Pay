@@ -28,7 +28,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div style={styles.app}>
+    <div className="app-shell" style={styles.app}>
       <Header currentPage={currentPage} onNavigate={handleNavigate} userId={userId} />
       
       <main style={styles.main}>
@@ -42,13 +42,9 @@ const App: React.FC = () => {
         {currentPage === 'notifications' && userId && <NotificationsPage userId={userId} />}
       </main>
 
-      <footer style={styles.footer}>
-        <p style={styles.footerText}>
-          SigmaPay © 2024 - Personal Finance Management System
-        </p>
-        <p style={styles.footerSubtext}>
-          Built with React & TypeScript | Backend: Node.js & Express
-        </p>
+      <footer className="app-footer" style={styles.footer}>
+        <p style={styles.footerText}>SigmaPay <span>•</span> Personal finance, made clear.</p>
+        <p style={styles.footerSubtext}>Secure planning for the decisions ahead.</p>
       </footer>
     </div>
   );
@@ -59,30 +55,31 @@ const styles: { [key: string]: React.CSSProperties } = {
     minHeight: '100vh',
     display: 'flex',
     flexDirection: 'column',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    backgroundAttachment: 'fixed',
+    background: '#f5f7f8',
   },
   main: {
     flex: 1,
-    paddingBottom: '80px',
+    paddingBottom: '56px',
   },
   footer: {
-    background: 'linear-gradient(135deg, #2d3748 0%, #1a202c 100%)',
-    color: 'white',
-    padding: '30px 20px',
-    textAlign: 'center',
+    background: '#17212b',
+    color: '#d9e2e5',
+    padding: '24px 20px',
+    textAlign: 'left',
     marginTop: 'auto',
-    boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.1)',
+    boxShadow: 'none',
   },
   footerText: {
-    margin: '8px 0',
-    fontSize: '15px',
-    fontWeight: '500',
+    margin: '0 auto 4px',
+    maxWidth: '1200px',
+    fontSize: '14px',
+    fontWeight: '600',
   },
   footerSubtext: {
-    margin: '8px 0',
+    margin: '0 auto',
+    maxWidth: '1200px',
     fontSize: '13px',
-    opacity: 0.8,
+    color: '#91a0a8',
   },
 };
 
