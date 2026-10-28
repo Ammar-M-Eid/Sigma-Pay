@@ -6,54 +6,53 @@ interface HeaderProps {
   userId: string | null;
 }
 
+const navigation = [
+  { key: 'budgets', label: 'Overview' },
+  { key: 'goals', label: 'Goals' },
+  { key: 'groups', label: 'Circles' },
+  { key: 'payments', label: 'Payments' },
+  { key: 'reports', label: 'Insights' },
+];
+
 const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, userId }) => {
   const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) {
-      onNavigate('auth');
-    }
+    if (window.confirm('Are you sure you want to logout?')) onNavigate('auth');
   };
 
   return (
-    <header style={styles.header}>
-      <div style={styles.container}>
-        <div style={styles.logoSection}>
-          <h1 style={styles.logo}>💰 SigmaPay</h1>
-          <p style={styles.tagline}>Smart Personal Finance</p>
-        </div>
+    <header className="topbar" style={styles.header}>
+      <div className="topbar-inner" style={styles.container}>
+        <button className="brand" style={styles.brand} onClick={() => userId && onNavigate('budgets')}>
+          <span style={styles.mark}>Σ</span>
+          <span>
+            <strong style={styles.logo}>SigmaPay</strong>
+            <small style={styles.tagline}>Your money, in focus.</small>
+          </span>
+        </button>
 
         {userId && (
-          <nav style={styles.nav}>
-            {[
-              { key: 'budgets', label: '📊 Budgets', icon: '💵' },
-              { key: 'goals', label: '🎯 Goals', icon: '🎯' },
-              { key: 'groups', label: '👥 Groups', icon: '👥' },
-              { key: 'payments', label: '💳 Payments', icon: '💳' },
-              { key: 'reports', label: '📈 Reports', icon: '📈' },
-              { key: 'notifications', label: '🔔 Alerts', icon: '🔔' },
-              { key: 'profile', label: '👤 Profile', icon: '👤' },
-            ].map(({ key, label, icon }) => (
+          <nav className="main-nav" style={styles.nav} aria-label="Primary navigation">
+            {navigation.map(({ key, label }) => (
               <button
                 key={key}
+                className={currentPage === key ? 'nav-item active' : 'nav-item'}
                 style={currentPage === key ? styles.navButtonActive : styles.navButton}
                 onClick={() => onNavigate(key)}
-                title={label}
               >
-                <span style={styles.navIcon}>{icon}</span>
-                <span style={styles.navLabel}>{label.split(' ')[1]}</span>
+                {label}
               </button>
             ))}
           </nav>
         )}
 
         {userId && (
-          <div style={styles.userSection}>
-            <div style={styles.userInfo}>
-              <span style={styles.userLabel}>User:</span>
-              <span style={styles.userId}>{userId.substring(0, 8)}...</span>
-            </div>
-            <button onClick={handleLogout} style={styles.logoutButton}>
-              🚪 Logout
+          <div className="topbar-actions" style={styles.userSection}>
+            <button className="icon-link" style={styles.iconButton} onClick={() => onNavigate('notifications')} aria-label="Notifications">⌁</button>
+            <button className="profile-chip" style={styles.profileChip} onClick={() => onNavigate('profile')}>
+              <span style={styles.avatar}>AM</span>
+              <span style={styles.userId}>Account</span>
             </button>
+            <button className="logout-link" onClick={handleLogout} style={styles.logoutButton}>Log out</button>
           </div>
         )}
       </div>
@@ -62,124 +61,21 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, userId }) => {
 };
 
 const styles: { [key: string]: React.CSSProperties } = {
-  header: {
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    color: 'white',
-    padding: '16px 0',
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
-    position: 'sticky',
-    top: 0,
-    zIndex: 1000,
-    backdropFilter: 'blur(10px)',
-  },
-  container: {
-    maxWidth: '1400px',
-    margin: '0 auto',
-    padding: '0 30px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap',
-    gap: '20px',
-  },
-  logoSection: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-  },
-  logo: {
-    margin: 0,
-    fontSize: '28px',
-    fontWeight: 'bold',
-    letterSpacing: '-0.5px',
-    textShadow: '2px 2px 4px rgba(0, 0, 0, 0.2)',
-  },
-  tagline: {
-    margin: 0,
-    fontSize: '12px',
-    opacity: 0.9,
-    fontStyle: 'italic',
-  },
-  nav: {
-    display: 'flex',
-    gap: '6px',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    flex: 1,
-  },
-  navIcon: {
-    marginRight: '4px',
-    fontSize: '16px',
-  },
-  navLabel: {
-    fontSize: '12px',
-    fontWeight: '600',
-  },
-  navButton: {
-    padding: '8px 14px',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '13px',
-    fontWeight: '500',
-    transition: 'all 0.3s ease',
-    backdropFilter: 'blur(10px)',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px',
-  },
-  navButtonActive: {
-    padding: '8px 14px',
-    background: 'white',
-    color: '#667eea',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '13px',
-    fontWeight: '600',
-    transition: 'all 0.3s ease',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px',
-  },
-  userSection: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-  },
-  userInfo: {
-    fontSize: '13px',
-    opacity: 0.95,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    padding: '8px 16px',
-    borderRadius: '6px',
-    display: 'flex',
-    gap: '8px',
-    alignItems: 'center',
-  },
-  userLabel: {
-    fontWeight: '600',
-    fontSize: '12px',
-    opacity: 0.8,
-  },
-  userId: {
-    fontFamily: 'monospace',
-    fontSize: '12px',
-  },
-  logoutButton: {
-    padding: '8px 16px',
-    backgroundColor: 'rgba(255, 87, 34, 0.3)',
-    color: 'white',
-    border: '2px solid rgba(255, 87, 34, 0.5)',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontWeight: '600',
-    fontSize: '13px',
-    transition: 'all 0.3s ease',
-  },
+  header: { background: '#fff', borderBottom: '1px solid #e4e9ec', position: 'sticky', top: 0, zIndex: 1000 },
+  container: { maxWidth: '1280px', margin: '0 auto', padding: '0 28px', minHeight: '76px', display: 'flex', alignItems: 'center', gap: '36px' },
+  brand: { display: 'flex', alignItems: 'center', gap: '10px', border: 0, background: 'transparent', padding: 0, color: '#17212b', textAlign: 'left' },
+  mark: { display: 'grid', placeItems: 'center', width: '34px', height: '34px', borderRadius: '10px', background: '#087f77', color: '#fff', fontSize: '22px', fontWeight: 800 },
+  logo: { display: 'block', fontFamily: "'Manrope', sans-serif", fontSize: '17px', letterSpacing: '-.03em' },
+  tagline: { display: 'block', color: '#87949b', fontSize: '10px', marginTop: '2px', letterSpacing: '.02em' },
+  nav: { display: 'flex', alignItems: 'center', gap: '4px', flex: 1 },
+  navButton: { background: 'transparent', border: 0, color: '#687581', padding: '10px 13px', borderRadius: '8px', fontSize: '13px', fontWeight: 600 },
+  navButtonActive: { background: '#e7f4f1', border: 0, color: '#05635d', padding: '10px 13px', borderRadius: '8px', fontSize: '13px', fontWeight: 700 },
+  userSection: { display: 'flex', alignItems: 'center', gap: '14px', marginLeft: 'auto' },
+  iconButton: { border: 0, background: 'transparent', fontSize: '23px', color: '#687581', padding: '4px 8px' },
+  profileChip: { display: 'flex', alignItems: 'center', gap: '8px', background: 'transparent', border: 0, color: '#17212b', fontSize: '13px', fontWeight: 600 },
+  avatar: { display: 'grid', placeItems: 'center', width: '30px', height: '30px', borderRadius: '50%', background: '#f6dfc9', color: '#8a552c', fontSize: '10px', fontWeight: 800 },
+  userId: { fontSize: '13px' },
+  logoutButton: { border: 0, background: 'transparent', color: '#87949b', fontSize: '12px', padding: '6px 0' },
 };
 
 export default Header;
