@@ -1,6 +1,5 @@
 import express, { Application } from 'express';
 import cors from 'cors';
-import { getSupabase, hasSupabaseConfig } from './config/supabase';
 import { Controller, createApiRouter } from './api/controller';
 import {
   AccountService,
@@ -36,7 +35,7 @@ function initializeApp(): Application {
 
   // PATTERN: Singleton - Initialize DatabaseConnectionPool
   const dbPool = DatabaseConnectionPool.getInstance();
-  console.log(`Database connection pool initialized (${hasSupabaseConfig() ? 'Supabase' : 'memory fallback'})`);
+  console.log('Database connection pool initialized (in-memory demo mode)');
 
   // DATA LAYER - Initialize Repositories (in-memory mock)
   const accountsRepository = new AccountsRepositoryImpl();
@@ -79,18 +78,12 @@ function initializeApp(): Application {
   app.use('/api', apiRouter);
 
   // Health check endpoint
-  app.get('/health', async (req, res) => {
-    if (!hasSupabaseConfig()) {
-      res.json({ status: 'ok', database: 'not configured', message: 'SigmaPay backend is running' });
-      return;
-    }
-
-    const { error } = await getSupabase().from('User').select('id').limit(1);
-    if (error) {
-      res.status(503).json({ status: 'degraded', database: 'unavailable', message: error.message });
-      return;
-    }
-    res.json({ status: 'ok', database: 'supabase', message: 'SigmaPay backend is running' });
+  app.get('/health', (_req, res) => {
+    res.json({
+      status: 'ok',
+      database: 'memory',
+      message: 'SigmaPay backend is running in demo mode; data is not persisted to Supabase',
+    });
   });
 
   console.log('API routes registered');
