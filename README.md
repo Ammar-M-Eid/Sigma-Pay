@@ -1,34 +1,68 @@
 # SigmaPay
 
-SigmaPay is a React/TypeScript personal-finance application with an Express backend and Supabase persistence configuration.
+SigmaPay is a React and TypeScript personal finance demo with an Express API.
+It runs locally without Supabase credentials or a database.
 
-## Run the complete system
+## Run with Docker Compose
 
-1. Copy `.env.example` to `.env` **at the repository root** and fill in the Supabase values. Keep `.env` uncommitted. Docker Compose reads this file for the backend and frontend API URL.
-2. Apply `supabase/schema.sql` in the Supabase SQL Editor.
-3. Run `docker compose up --build`.
-4. Open <http://localhost:3000>. The API health endpoint is <http://localhost:3001/health>.
+Requirements: Docker Desktop (or Docker Engine) with Compose enabled.
 
-The backend uses `SUPABASE_SECRET_KEY` only on the server. The frontend receives only `REACT_APP_API_URL`.
+From the repository root:
 
-### Environment variables
-
-Put these in `Sigma-Pay/.env` (next to `docker-compose.yml`):
-
-- `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`: Supabase project credentials.
-- `DATABASE_URL`, `DIRECT_URL`: Supabase pooled and direct Postgres connection strings.
-- `PORT`: backend port, normally `3001`.
-- `CORS_ORIGIN`: browser origin, normally `http://localhost:3000`.
-- `REACT_APP_API_URL`: frontend API URL, normally `http://localhost:3001`.
-- `COOKIE_SECURE`: use `false` for local HTTP; set `true` behind HTTPS.
-
-For frontend-only development, put `REACT_APP_API_URL=http://localhost:3001` in `frontend-client/.env`, then run `npm start` from `frontend-client`.
-
-## Development
-
-```bash
-cd backend-server && npm ci && npm run build
-cd ../frontend-client && npm ci && npm run build
+```sh
+docker compose up --build
 ```
 
-The deployment and design-to-code mapping are documented in `DOCS/TRACEABILITY.md`.
+Open <http://localhost:3000>. The API health endpoint is <http://localhost:3001/health>.
+To stop the services, press `Ctrl+C`; to remove the containers, run `docker compose down`.
+
+The Compose file uses local demo defaults. Copy `.env.example` to `.env` only if you
+want to override those defaults. Never commit `.env` or put server credentials in
+frontend configuration.
+
+## Run without Docker
+
+Install Node.js 20 or newer, then open two terminals at the repository root.
+
+Terminal 1, start the API:
+
+```sh
+cd backend-server
+npm ci
+npm run dev
+```
+
+Terminal 2, start the website:
+
+```sh
+cd frontend-client
+npm ci
+npm start
+```
+
+Open <http://localhost:3000>; check the API at <http://localhost:3001/health>.
+The React development server reads `REACT_APP_API_URL` from
+`frontend-client/.env`; it defaults to `http://localhost:3001`.
+
+## Demo mode and current limits
+
+- Sign-in is a mock flow; any valid email and password with at least six characters works.
+- API repositories are in memory. Data is temporary and disappears when the backend restarts.
+- Supabase and Postgres variables are placeholders for future work. The application
+  currently does not save application data to Supabase, even when those variables are set.
+- Payments, identity checks, notifications and account actions are demonstrations,
+  not production financial services.
+
+## Build locally
+
+```sh
+cd backend-server
+npm ci
+npm run build
+
+cd ../frontend-client
+npm ci
+npm run build
+```
+
+The architecture and design-to-code mapping are documented in `DOCS/TRACEABILITY.md`.

@@ -30,6 +30,10 @@ const App: React.FC = () => {
   return (
     <div className="app-shell" style={styles.app}>
       <Header currentPage={currentPage} onNavigate={handleNavigate} userId={userId} />
+
+      <aside role="status" style={styles.demoNotice}>
+        Demo mode: sign-in and financial actions are simulated. API data is temporary and resets when the backend restarts.
+      </aside>
       
       <main style={styles.main}>
         {currentPage === 'auth' && <AuthPage onLoginSuccess={handleLoginSuccess} />}
@@ -60,6 +64,14 @@ const styles: { [key: string]: React.CSSProperties } = {
   main: {
     flex: 1,
     paddingBottom: '56px',
+  },
+  demoNotice: {
+    padding: '10px 20px',
+    background: '#fff4d6',
+    color: '#654d12',
+    textAlign: 'center',
+    fontSize: '13px',
+    borderBottom: '1px solid #f0dfad',
   },
   footer: {
     background: '#17212b',
