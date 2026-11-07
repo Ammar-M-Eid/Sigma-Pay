@@ -15,12 +15,17 @@ const FinanceVector: React.FC<FinanceVectorProps> = ({ kind, title, className = 
       <title>{title}</title>
       <desc>{label} shown as connected account, planning, and activity symbols.</desc>
       <defs>
-        <pattern id={`grid-${kind}`} width="24" height="24" patternUnits="userSpaceOnUse">
-          <path d="M24 0H0V24" fill="none" stroke="#dbe8f3" strokeWidth=".7" />
-        </pattern>
+        <linearGradient id={`glass-${kind}`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#fff" stopOpacity=".34" />
+          <stop offset=".46" stopColor="#fff" stopOpacity=".08" />
+          <stop offset="1" stopColor="#8ec5ff" stopOpacity=".13" />
+        </linearGradient>
+        <radialGradient id={`glow-${kind}`} cx="50%" cy="50%" r="50%">
+          <stop offset="0" stopColor="#8fc2ff" stopOpacity=".25" />
+          <stop offset="1" stopColor="#8fc2ff" stopOpacity="0" />
+        </radialGradient>
       </defs>
-      <rect x="30" y="24" width="540" height="312" rx="24" fill="#f7fbff" />
-      <rect x="30" y="24" width="540" height="312" rx="24" fill={`url(#grid-${kind})`} opacity=".55" />
+      <ellipse cx="300" cy="185" rx="235" ry="145" fill={`url(#glow-${kind})`} />
 
       {kind === 'overview' ? (
         <>
@@ -29,6 +34,7 @@ const FinanceVector: React.FC<FinanceVectorProps> = ({ kind, title, className = 
           <g className="vector-node vector-income"><circle cx="82" cy="186" r="31" fill="#e5f2ff" stroke="#b6d2ee" /><path d="M82 202v-31m0 0-12 12m12-12 12 12" fill="none" stroke="#2868bf" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /><text x="82" y="238" textAnchor="middle">Income</text></g>
           <g className="vector-account">
             <rect x="216" y="105" width="166" height="162" rx="18" fill="#12355c" />
+            <path d="M234 123q0-9 10-9h110q10 0 10 9v32H234z" fill={`url(#glass-${kind})`} />
             <rect x="233" y="122" width="34" height="34" rx="10" fill="#dcecff" />
             <path d="M243 139h14m-7-7v14" stroke="#2868bf" strokeWidth="2.4" strokeLinecap="round" />
             <text className="vector-account-title" x="278" y="137">Your money</text>
@@ -49,6 +55,7 @@ const FinanceVector: React.FC<FinanceVectorProps> = ({ kind, title, className = 
           <circle cx="505" cy="187" r="18" fill="#e5f2ff" stroke="#99bce3" strokeWidth="2" />
           <path d="M90 187h12m-5-5 5 5-5 5" fill="none" stroke="#3e77bf" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           <rect x="224" y="84" width="153" height="207" rx="20" fill="#fff" stroke="#d7e5f0" strokeWidth="1.5" />
+          <path d="M225 104q0-19 19-19h113q19 0 19 19v42H225z" fill={`url(#glass-${kind})`} />
           <rect x="240" y="100" width="121" height="170" rx="14" fill="#edf5fc" />
           <text x="300" y="74" className="vector-top-label" textAnchor="middle">{label}</text>
           {kind === 'budgets' && <g><rect x="264" y="197" width="19" height="56" rx="5" fill="#8db4e5" /><rect x="291" y="165" width="19" height="88" rx="5" fill="#5189d0" /><rect x="318" y="136" width="19" height="117" rx="5" fill="#2c6dc5" /><path d="M257 253h90" stroke="#c9d9e7" strokeWidth="2" /><circle cx="351" cy="118" r="18" fill="#e3f6ee" /><path d="m343 118 5 5 10-11" fill="none" stroke="#168565" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></g>}

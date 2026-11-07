@@ -74,6 +74,7 @@ const App: React.FC = () => {
       const maxScroll = Math.max(0, root.scrollHeight - window.innerHeight);
       const progress = maxScroll ? Math.min(1, Math.max(0, window.scrollY / maxScroll)) : 0;
       root.style.setProperty('--scroll-progress', `${progress}`);
+      root.style.setProperty('--hero-shift', reducedMotion.matches ? '0px' : `${Math.min(34, window.scrollY * 0.045)}px`);
       scrollFrame = 0;
     };
     const onScroll = () => {

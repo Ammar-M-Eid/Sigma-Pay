@@ -1,4 +1,4 @@
-import express, { Application } from 'express';
+import express, { Application, NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import { Controller, createApiRouter } from './api/controller';
 import { IUserAccount } from './domain/entities';
@@ -24,7 +24,6 @@ import {
   NotificationRepositoryImpl,
   BillRepositoryImpl,
   LoginActivityRepositoryImpl,
-  DatabaseConnectionPool,
 } from './data/repositories';
 
 const PORT = Number(process.env.PORT ?? 3001);
@@ -40,15 +39,27 @@ const DOMAIN_PREFIXES: Record<string, string[]> = {
 // Initialize the application following the layered architecture
 function initializeApp(): Application {
   const app = express();
+  if (SERVICE_DOMAIN !== 'all' && !DOMAIN_PREFIXES[SERVICE_DOMAIN]) {
+    throw new Error(`Unknown SERVICE_DOMAIN: ${SERVICE_DOMAIN}`);
+  }
 
-  // Middleware
-  app.use(cors({ origin: process.env.CORS_ORIGIN?.split(',') ?? '*', credentials: true }));
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
-
-  // PATTERN: Singleton - Initialize DatabaseConnectionPool
-  const dbPool = DatabaseConnectionPool.getInstance();
-  console.log('Database connection pool initialized (in-memory demo mode)');
+  const allowedOrigins = (process.env.CORS_ORIGIN ?? 'http://localhost:3000')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+  if (allowedOrigins.includes('*')) {
+    throw new Error('CORS_ORIGIN cannot use a wildcard while credentialed requests are enabled');
+  }
+  app.disable('x-powered-by');
+  app.use(cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) callback(null, true);
+      else callback(new Error('Origin is not allowed by CORS'));
+    },
+    credentials: true,
+  }));
+  app.use(express.json({ limit: '1mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
   // DATA LAYER - Initialize Repositories (in-memory mock)
   const accountsRepository = new AccountsRepositoryImpl();
@@ -111,9 +122,6 @@ function initializeApp(): Application {
   const apiRouter = createApiRouter(controller);
   if (SERVICE_DOMAIN !== 'all') {
     const allowedPrefixes = DOMAIN_PREFIXES[SERVICE_DOMAIN];
-    if (!allowedPrefixes) {
-      throw new Error(`Unknown SERVICE_DOMAIN: ${SERVICE_DOMAIN}`);
-    }
     app.use('/api', (req, res, next) => {
       // Express may expose the pre-mount or router-relative pathname depending on
       // the middleware stack; normalize both forms before applying the domain guard.
@@ -135,9 +143,22 @@ function initializeApp(): Application {
     res.json({
       status: 'ok',
       database: 'memory',
+      mode: 'demo',
       service: SERVICE_DOMAIN,
       message: 'SigmaPay service is running in demo mode; data is process-local and not persisted to Supabase',
     });
+  });
+
+  app.use((_req, res) => {
+    res.status(404).json({ success: false, message: 'Route not found' });
+  });
+  app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
+    const status = typeof error === 'object' && error !== null && 'type' in error && error.type === 'entity.too.large'
+      ? 413
+      : typeof error === 'object' && error !== null && 'type' in error && error.type === 'entity.parse.failed'
+        ? 400
+        : 500;
+    res.status(status).json({ success: false, message: status === 500 ? 'Internal server error' : status === 413 ? 'Request body is too large' : 'Invalid JSON request body' });
   });
 
   console.log('API routes registered');
@@ -148,15 +169,13 @@ function initializeApp(): Application {
 // Start the server
 const app = initializeApp();
 
-app.listen(PORT, () => {
-  console.log(`\n🚀 SigmaPay Backend Server started successfully!`);
-  console.log(`📡 Server running on http://localhost:${PORT}`);
-  console.log(`🏥 Health check: http://localhost:${PORT}/health`);
-  console.log(`📋 API Base: http://localhost:${PORT}/api`);
-  console.log(`\n✅ Architecture layers initialized:`);
-  console.log(`   - Data Layer: In-memory repositories`);
-  console.log(`   - Service Layer: Business logic services`);
-  console.log(`   - Controller Layer: REST API endpoints\n`);
-});
+if (require.main === module) {
+  const server = app.listen(PORT, () => {
+    console.log(`SigmaPay ${SERVICE_DOMAIN} service listening on port ${PORT} (local demo mode)`);
+  });
+  const shutdown = () => server.close(() => process.exit(0));
+  process.once('SIGINT', shutdown);
+  process.once('SIGTERM', shutdown);
+}
 
 export default app;

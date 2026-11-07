@@ -625,3 +625,109 @@ button, a { transition: color .18s ease, background-color .18s ease, border-colo
   .scroll-reveal, .scroll-reveal.is-visible { opacity: 1; transform: none; transition: none; }
   .vector-flow-main, .vector-flow-accent { stroke-dasharray: none; stroke-dashoffset: 0; transition: none; }
 }
+
+/* Open, editorial finance heroes with soft glass accents and scroll-linked depth. */
+:root { --hero-shift: 0px; }
+.overview-hero {
+  min-height: 510px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.overview-hero::before {
+  top: -80px;
+  left: 48%;
+  width: 500px;
+  height: 500px;
+  border-color: rgba(52,119,209,.1);
+  box-shadow: 0 0 0 44px rgba(52,119,209,.025), 0 0 0 96px rgba(52,119,209,.018);
+}
+.overview-copy { padding-left: clamp(20px,3.3vw,48px); }
+.overview-copy h1 { color: #102e50; }
+.overview-copy h1 span { color: #3477d1; }
+.overview-art {
+  min-height: 480px;
+  overflow: visible;
+  background: transparent;
+  isolation: isolate;
+}
+.overview-art::before {
+  inset: 7% 1% 7% 3%;
+  border-radius: 48% 52% 42% 58% / 48% 42% 58% 52%;
+  background:
+    radial-gradient(ellipse at 53% 48%,rgba(128,183,244,.18),rgba(207,229,251,.10) 42%,transparent 70%),
+    linear-gradient(135deg,rgba(52,119,209,.055) 1px,transparent 1px),
+    linear-gradient(45deg,rgba(52,119,209,.04) 1px,transparent 1px);
+  background-size: auto,28px 28px,28px 28px;
+  -webkit-mask-image: radial-gradient(ellipse, #000 35%, transparent 77%);
+  mask-image: radial-gradient(ellipse, #000 35%, transparent 77%);
+}
+.overview-art .finance-vector,
+.module-intro .finance-vector {
+  filter: drop-shadow(0 16px 24px rgba(33,83,139,.10));
+  transform: translate3d(0,calc(var(--hero-shift) * -.22),0);
+  transition: filter .35s ease;
+}
+.overview-art .finance-vector:hover,
+.module-intro .finance-vector:hover { filter: drop-shadow(0 20px 28px rgba(33,83,139,.17)); }
+.finance-vector > ellipse { opacity: .76; }
+.module-intro {
+  position: relative;
+  min-height: 270px;
+  overflow: visible;
+  margin-bottom: 32px;
+  padding: 28px 38px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  isolation: isolate;
+}
+.module-intro::before {
+  position: absolute;
+  z-index: -1;
+  top: -12px;
+  right: 4%;
+  width: 56%;
+  height: calc(100% + 24px);
+  border-radius: 50%;
+  background: radial-gradient(ellipse,rgba(120,177,239,.17),rgba(196,222,249,.08) 50%,transparent 74%);
+  content: '';
+}
+.module-intro::after {
+  position: absolute;
+  z-index: -1;
+  right: 17%;
+  bottom: 6%;
+  width: 30%;
+  height: 1px;
+  background: linear-gradient(90deg,transparent,rgba(56,123,205,.28),transparent);
+  content: '';
+}
+.module-intro .finance-vector { width: min(100%,500px); }
+.finance-vector .vector-account,
+.finance-vector > g { transform-box: fill-box; transform-origin: center; }
+.finance-vector .vector-flow-accent { filter: drop-shadow(0 0 2px rgba(60,127,225,.35)); }
+.hero-index { border: 1px solid rgba(186,211,239,.6); background: rgba(255,255,255,.82); box-shadow: 0 8px 24px rgba(26,68,117,.08); backdrop-filter: blur(12px); }
+.button-primary { box-shadow: 0 8px 18px rgba(37,99,198,.18),inset 0 1px 0 rgba(255,255,255,.24); }
+.button-primary:hover { box-shadow: 0 11px 22px rgba(37,99,198,.24),inset 0 1px 0 rgba(255,255,255,.24); }
+
+@media (max-width: 900px) {
+  .overview-hero { min-height: 410px; }
+  .overview-art { min-height: 390px; }
+  .module-intro { min-height: 220px; padding: 24px; }
+}
+@media (max-width: 620px) {
+  .overview-hero { min-height: 0; }
+  .overview-copy { padding: 30px 12px 18px; }
+  .overview-art { min-height: 260px; padding: 0; }
+  .overview-art::before { inset: 3% -4%; }
+  .module-intro { min-height: 230px; margin-bottom: 24px; padding: 22px 12px; }
+  .module-intro-copy { max-width: 91%; }
+  .module-intro .finance-vector { width: 230px; right: -48px; bottom: -43px; opacity: .42; }
+  .overview-art .finance-vector, .module-intro .finance-vector { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .overview-art .finance-vector, .module-intro .finance-vector { transform: none; transition: none; }
+  .hero-index { backdrop-filter: none; }
+}

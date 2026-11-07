@@ -24,27 +24,6 @@ import {
   IBillRepository,
 } from '../domain/repositoryInterfaces';
 
-// PATTERN: Singleton - DatabaseConnectionPool (simulated with in-memory stores)
-export class DatabaseConnectionPool {
-  private static instance: DatabaseConnectionPool;
-  private connections: Map<string, any>;
-
-  private constructor() {
-    this.connections = new Map();
-  }
-
-  public static getInstance(): DatabaseConnectionPool {
-    if (!DatabaseConnectionPool.instance) {
-      DatabaseConnectionPool.instance = new DatabaseConnectionPool();
-    }
-    return DatabaseConnectionPool.instance;
-  }
-
-  public getConnection(): any {
-    return { connected: true };
-  }
-}
-
 // Repository Implementations with in-memory storage
 
 export class UserRepositoryImpl implements IUserRepository {
