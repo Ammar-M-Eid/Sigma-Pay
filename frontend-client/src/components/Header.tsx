@@ -22,13 +22,12 @@ const navigation = [
 ];
 
 const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, userId }) => (
-  <aside className="sidebar">
+  <header className="app-header">
     <a className="brand" href="#/overview" onClick={() => onNavigate('overview')} aria-label="SigmaPay overview">
-      <span className="brand-mark" aria-hidden="true">S</span>
-      <span className="brand-name">Sigma<span>Pay</span></span>
+      <span className="brand-mark" aria-hidden="true"><span /></span>
+      <span className="brand-name">sigma<span>pay</span></span>
     </a>
 
-    <div className="workspace-label">WORKSPACE</div>
     <nav className="side-nav" aria-label="Main navigation">
       {navigation.map(({ key, label, icon: Icon }) => (
         <a
@@ -38,23 +37,18 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, userId }) => (
           aria-current={currentPage === key ? 'page' : undefined}
           onClick={() => onNavigate(key)}
         >
-          <Icon className="nav-icon" size={17} weight="regular" aria-hidden="true" />
+          <Icon className="nav-icon" size={17} weight={currentPage === key ? 'fill' : 'regular'} aria-hidden="true" />
           <span>{label}</span>
         </a>
       ))}
     </nav>
 
-    <div className="sidebar-spacer" />
-    <div className="storage-note">
-      <span className="status-dot" />
-      <div><strong>Local demo</strong><small>Data resets with the backend</small></div>
-    </div>
     <button className="account-switch" type="button" onClick={() => onNavigate(userId ? 'auth' : 'overview')}>
       <span className="account-avatar">{userId ? 'D' : '?'}</span>
-      <span className="account-label"><strong>{userId ? 'Demo account' : 'Sign in'}</strong><small>{userId ? 'Switch account' : 'Access your account'}</small></span>
-      <span className="account-arrow" aria-hidden="true">↗</span>
+      <span className="account-label"><strong>{userId ? 'Demo account' : 'Sign in'}</strong></span>
+      <span className="account-arrow" aria-hidden="true">⌄</span>
     </button>
-  </aside>
+  </header>
 );
 
 export default Header;

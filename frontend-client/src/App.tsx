@@ -93,10 +93,9 @@ const App: React.FC = () => {
       <div className="main-column">
         <header className="topbar">
           <div className="breadcrumb"><span>PERSONAL FINANCE</span><span aria-hidden="true">/</span><strong>{currentPage === 'auth' ? 'Account access' : currentPage === 'overview' ? 'Overview' : sceneContent[currentPage].title.replace(/[.]/g, '')}</strong></div>
-          <div className="topbar-status"><span className={`api-dot api-${serviceState}`} />{serviceState === 'online' ? 'Services online' : serviceState === 'checking' ? 'Checking services' : 'API offline'}</div>
+          <div className="topbar-meta"><span className="local-demo-chip"><span className="demo-chip-icon">D</span> Local demo</span><span className="topbar-status"><span className={`api-dot api-${serviceState}`} />{serviceState === 'online' ? 'All systems ready' : serviceState === 'checking' ? 'Checking services' : 'API offline'}</span></div>
         </header>
-        <div className="demo-banner" role="status"><strong>Local demo</strong><span>Use sample information only. Data is temporary; payments and identity checks are simulations.</span></div>
-        <main id="main-content" className="main-content" key={currentPage}>
+        <main id="main-content" className="main-content page-transition" key={currentPage}>
           {section}
         </main>
         <footer className="app-footer"><span>SigmaPay</span><span>Planning tools for a clearer view of your money.</span></footer>
