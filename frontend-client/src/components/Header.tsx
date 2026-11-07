@@ -1,7 +1,7 @@
 import React from 'react';
-import { House, Wallet, Target, UsersThree, Receipt, CreditCard, ChartBar, Bell, UserCircle } from '@phosphor-icons/react';
+import { House, Wallet, Target, UsersThree, Receipt, CreditCard, ChartBar, Bell, UserCircle, Sparkle } from '@phosphor-icons/react';
 
-export type Page = 'overview' | 'budgets' | 'goals' | 'groups' | 'bills' | 'payments' | 'reports' | 'notifications' | 'profile' | 'auth';
+export type Page = 'overview' | 'budgets' | 'goals' | 'groups' | 'bills' | 'payments' | 'reports' | 'features' | 'notifications' | 'profile' | 'auth';
 
 interface HeaderProps {
   currentPage: Page;
@@ -17,6 +17,7 @@ const navigation = [
   { key: 'bills' as const, label: 'Bills', icon: Receipt },
   { key: 'payments' as const, label: 'Payments', icon: CreditCard },
   { key: 'reports' as const, label: 'Reports', icon: ChartBar },
+  { key: 'features' as const, label: 'Explore', icon: Sparkle },
   { key: 'notifications' as const, label: 'Notifications', icon: Bell },
   { key: 'profile' as const, label: 'Profile', icon: UserCircle },
 ];

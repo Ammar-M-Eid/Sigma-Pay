@@ -12,11 +12,20 @@ This table maps the source requirements to the current local demo implementation
 | Reports and export | `frontend-client/src/pages/ReportsPage.tsx` | `POST /api/reports/:userId`, `GET /api/reports/:userId/export` | CSV export contains a report generated from the finance service's current transactions. |
 | Bills and scheduled payments | `frontend-client/src/pages/BillsPage.tsx`, `PaymentsPage.tsx` | `/api/bills/*`, `/api/payments/*` | Payments are sandbox events; scheduled payments are not automatically executed. |
 | Notifications and preferences | `frontend-client/src/pages/NotificationsPage.tsx` | `/api/notifications/*` | Alerts/preferences are local to the notifications service. No external delivery. |
-| Local web deployment | `docker-compose.yml`, `gateway/nginx.conf`, Dockerfiles | Compose runs five domain APIs, gateway and frontend | Each service has its own in-memory store. |
+| Learning quiz | `frontend-client/src/pages/FeatureHubPage.tsx` | `/api/learning/resources`, `/quiz`, `/quiz/submit`, `/:userId/history` | Quiz scoring and history are process-local. |
+| Illustrative investments and general insights | `frontend-client/src/pages/FeatureHubPage.tsx` | `/api/investments/*`, `/api/advisory/*` | No market-data or advisor provider is connected; content is explicitly educational. |
+| Offers, cards, and financial connections | `frontend-client/src/pages/FeatureHubPage.tsx` | `/api/offers`, `/api/cards/*`, `/api/connections/*` | APIs return explicit unavailable states until providers are configured. |
+| Local web deployment | `docker-compose.yml`, `gateway/nginx.conf`, Dockerfiles | Compose runs six domain APIs, gateway and frontend | Each service has its own in-memory store. |
 
 ## Storage and health
 
-Repositories in `backend-server/src/data/repositories.ts` are in-memory. `GET /health` reports `database: memory`; it does not probe Supabase. `backend-server/src/config/supabase.ts` and `supabase/schema.sql` are not connected to active runtime repository operations. Supabase credentials should not be added to the front end and will not enable persistence in this version.
+Repositories in `backend-server/src/data/repositories.ts` are in-memory. `GET /health` reports `database: memory`; it does not probe Supabase. `backend-server/src/config/supabase.ts` now requires a server-only secret key and never falls back to a publishable key, but it is not connected to repository operations. Supabase remains unavailable until valid credentials and migrations are configured. Never place the server secret in the front end.
+
+## Source-document scope
+
+The final proposal describes application behavior and explicitly distinguishes configured provider integrations from unavailable ones. The PM1 document also lists course submission artifacts such as UML diagrams, Jira/velocity evidence, GHCR images, and the CI pipeline; those are academic delivery requirements, not customer-facing application features.
+
+The customer-facing shell does not display service-health or system-performance statistics. The operational `/health` endpoint remains available to Docker and operators.
 
 ## Build verification
 

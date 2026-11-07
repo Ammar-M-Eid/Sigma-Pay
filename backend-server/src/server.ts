@@ -1,6 +1,7 @@
 import express, { Application, NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import { Controller, createApiRouter } from './api/controller';
+import { createFeatureHubRouter } from './api/featureHub';
 import { IUserAccount } from './domain/entities';
 import {
   AccountService,
@@ -34,6 +35,7 @@ const DOMAIN_PREFIXES: Record<string, string[]> = {
   savings: ['/groups'],
   payments: ['/payments', '/bills'],
   notifications: ['/notifications'],
+  features: ['/investments', '/advisory', '/learning', '/offers', '/cards', '/connections'],
 };
 
 // Initialize the application following the layered architecture
@@ -120,6 +122,7 @@ function initializeApp(): Application {
 
   // API ROUTES - Register Express routes
   const apiRouter = createApiRouter(controller);
+  const featureHubRouter = createFeatureHubRouter();
   if (SERVICE_DOMAIN !== 'all') {
     const allowedPrefixes = DOMAIN_PREFIXES[SERVICE_DOMAIN];
     app.use('/api', (req, res, next) => {
@@ -137,6 +140,7 @@ function initializeApp(): Application {
     });
   }
   app.use('/api', apiRouter);
+  app.use('/api', featureHubRouter);
 
   // Health check endpoint
   app.get('/health', (_req, res) => {

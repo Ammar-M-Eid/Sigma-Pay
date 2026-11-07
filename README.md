@@ -24,9 +24,11 @@ to these domain services:
 | Savings | `/api/groups/*` |
 | Payments | `/api/payments/*` |
 | Notifications | `/api/notifications/*` |
+| Feature hub | `/api/investments/*`, `/api/advisory/*`, `/api/learning/*`, `/api/offers`, `/api/cards/*`, `/api/connections/*` |
 
-Each service is a separate container using the same backend image, with an Nginx API
-gateway in front. The frontend keeps its existing API URL and route contract.
+Each domain service is a separate container using the same backend image, with an Nginx API
+gateway in front. The feature hub provides educational and illustrative functionality; it
+does not claim live market, card, advisor, partner, or bank connections.
 
 Check service status with `docker compose ps`. Stop and remove the containers with
 `docker compose down`.
@@ -76,6 +78,14 @@ The React development server reads `REACT_APP_API_URL` from
   currently does not save application data to Supabase, even when those variables are set.
 - Payments, identity checks, notifications and account actions are demonstrations,
   not production financial services.
+- Investment examples and advice responses are educational only. Quiz attempts,
+  preferences, and consultation requests are held in the feature service's memory and
+  disappear when that container restarts. Advisor consultations are recorded locally;
+  no advisor provider is connected.
+- Offers, cards, bank data, wallets, and market data return explicit unavailable states
+  until their provider integrations are configured and verified.
+- Supabase access requires both `SUPABASE_URL` and a server-only
+  `SUPABASE_SECRET_KEY`. The server client will not fall back to a publishable key.
 
 ## Build locally
 

@@ -28,16 +28,26 @@ class ApiClient {
         },
       };
 
-      if (body) {
+      if (body !== undefined) {
         options.body = JSON.stringify(body);
       }
 
       const response = await fetch(`${this.baseUrl}${endpoint}`, options);
-      const data = await response.json();
+      let data: ApiResponse<T>;
+      try {
+        data = await response.json() as ApiResponse<T>;
+      } catch {
+        return {
+          success: false,
+          message: response.ok ? 'The server returned an unreadable response.' : `Request failed (${response.status}).`,
+        };
+      }
+      if (!response.ok) {
+        return { ...data, success: false, message: data.message || `Request failed (${response.status}).` };
+      }
       return data;
-    } catch (error) {
-      console.error('API request failed:', error); // TODO: Replace with proper logging service in production
-      return { success: false, message: 'Network error' };
+    } catch {
+      return { success: false, message: 'The service could not be reached. Check your connection and try again.' };
     }
   }
 
@@ -226,6 +236,21 @@ class ApiClient {
   async setNotificationPreference(userId: string, preferenceType: string, isEnabled: boolean) {
     return this.request('/notifications/preferences', 'POST', { userId, preferenceType, isEnabled });
   }
+
+  async getInvestmentOptions() { return this.request('/investments/options'); }
+  async getInvestmentStrategy(userId: string) { return this.request(`/investments/${userId}/strategy`); }
+  async saveInvestmentStrategy(userId: string, optionIds: string[]) { return this.request(`/investments/${userId}/strategy`, 'PUT', { optionIds }); }
+  async getAdvisoryInsights(userId: string) { return this.request(`/advisory/${userId}/insights`); }
+  async askAdvisoryQuestion(userId: string, question: string) { return this.request(`/advisory/${userId}/questions`, 'POST', { question }); }
+  async requestAdvisorConsultation(userId: string, topic: string) { return this.request(`/advisory/${userId}/consultations`, 'POST', { topic }); }
+  async getConsultationHistory(userId: string) { return this.request(`/advisory/${userId}/history`); }
+  async getLearningResources() { return this.request('/learning/resources'); }
+  async getLearningQuiz() { return this.request('/learning/quiz'); }
+  async submitLearningQuiz(userId: string, answers: number[]) { return this.request('/learning/quiz/submit', 'POST', { userId, answers }); }
+  async getLearningHistory(userId: string) { return this.request(`/learning/${userId}/history`); }
+  async getOffers() { return this.request('/offers'); }
+  async getCardActivity(userId: string) { return this.request(`/cards/${userId}/activity`); }
+  async getFinancialConnections(userId: string) { return this.request(`/connections/${userId}`); }
 }
 
 const apiClient = new ApiClient(API_BASE_URL);

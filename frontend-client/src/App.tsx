@@ -11,8 +11,9 @@ import PaymentsPage from './pages/PaymentsPage';
 import GroupSavingsPage from './pages/GroupSavingsPage';
 import NotificationsPage from './pages/NotificationsPage';
 import BillsPage from './pages/BillsPage';
+import FeatureHubPage from './pages/FeatureHubPage';
 
-const pageSet: Page[] = ['overview', 'budgets', 'goals', 'groups', 'bills', 'payments', 'reports', 'notifications', 'profile', 'auth'];
+const pageSet: Page[] = ['overview', 'budgets', 'goals', 'groups', 'bills', 'payments', 'reports', 'features', 'notifications', 'profile', 'auth'];
 const pageIllustrations: Record<Exclude<Page, 'auth'>, { kind: IllustrationKind; title: string; description: string }> = {
   overview: { kind: 'overview', title: 'Your money, in focus.', description: 'A clear place to plan, make progress and understand the choices ahead.' },
   budgets: { kind: 'budgets', title: 'Give every plan a number.', description: 'Create a spending plan, then record expenses against its categories.' },
@@ -21,6 +22,7 @@ const pageIllustrations: Record<Exclude<Page, 'auth'>, { kind: IllustrationKind;
   bills: { kind: 'bills', title: 'Keep bills on schedule.', description: 'Add bills, review due dates and schedule recurring payments in the sandbox.' },
   payments: { kind: 'payments', title: 'Payments in a safe sandbox.', description: 'Explore the payment flow with simulated methods and no real money.' },
   reports: { kind: 'reports', title: 'See the story in your activity.', description: 'Review income and spending summaries based on recorded demo data.' },
+  features: { kind: 'reports', title: 'Explore your financial toolkit.', description: 'Learn, review illustrative information, and see which services are available.' },
   notifications: { kind: 'notifications', title: 'Choose what deserves your attention.', description: 'Manage local preferences and view alerts generated in this session.' },
   profile: { kind: 'profile', title: 'Your account, your settings.', description: 'Review profile details and demo account security controls.' },
 };
@@ -33,22 +35,10 @@ function readPage(): Page {
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>(readPage);
   const [userId, setUserId] = useState<string | null>(() => window.localStorage.getItem('sigmapay-user-id') || 'demo-user');
-  const [serviceState, setServiceState] = useState<'checking' | 'online' | 'offline'>('checking');
-
   useEffect(() => {
     const syncPage = () => setCurrentPage(readPage());
     window.addEventListener('hashchange', syncPage);
     return () => window.removeEventListener('hashchange', syncPage);
-  }, []);
-
-  useEffect(() => {
-    const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
-    let mounted = true;
-    fetch(`${baseUrl}/health`)
-      .then((response) => response.ok ? response.json() : Promise.reject(new Error('API unavailable')))
-      .then((health) => { if (mounted) setServiceState(health.status === 'ok' ? 'online' : 'offline'); })
-      .catch(() => { if (mounted) setServiceState('offline'); });
-    return () => { mounted = false; };
   }, []);
 
   useEffect(() => {
@@ -136,7 +126,7 @@ const App: React.FC = () => {
   ) : currentPage === 'auth' ? (
     <div className="auth-stage"><AuthPage onLoginSuccess={loginSuccess} /></div>
   ) : userId ? (
-    <div className={`module-page module-${currentPage}`}>
+    currentPage === 'features' ? <FeatureHubPage userId={userId} /> : <div className={`module-page module-${currentPage}`}>
       <section className="module-intro">
         <div className="module-intro-copy">
           <span className="section-kicker">SigmaPay · {currentPage === 'groups' ? 'Group savings' : currentPage.charAt(0).toUpperCase() + currentPage.slice(1)}</span>
@@ -167,7 +157,7 @@ const App: React.FC = () => {
       <div className="main-column">
         <header className="topbar">
           <div className="breadcrumb"><span>PERSONAL FINANCE</span><span aria-hidden="true">/</span><strong>{currentPage === 'auth' ? 'Account access' : currentPage === 'overview' ? 'Overview' : pageIllustrations[currentPage].title.replace(/[.]/g, '')}</strong></div>
-          <div className="topbar-meta"><span className="local-demo-chip"><span className="demo-chip-icon">D</span> Local demo</span><span className="topbar-status"><span className={`api-dot api-${serviceState}`} />{serviceState === 'online' ? 'All systems ready' : serviceState === 'checking' ? 'Checking services' : 'API offline'}</span></div>
+          <div className="topbar-meta"><span className="local-demo-chip"><span className="demo-chip-icon">D</span> Local demo</span></div>
         </header>
         <main id="main-content" className="main-content page-transition" key={currentPage}>
           {section}

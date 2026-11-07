@@ -52,6 +52,13 @@ services:
       <<: *backend-environment
       SERVICE_DOMAIN: notifications
 
+  features-service:
+    <<: *backend
+    image: local/sigmapay-features:demo
+    environment:
+      <<: *backend-environment
+      SERVICE_DOMAIN: features
+
   api-gateway:
     image: nginx:1.27-alpine
     restart: unless-stopped
@@ -67,6 +74,8 @@ services:
       payments-service:
         condition: service_healthy
       notifications-service:
+        condition: service_healthy
+      features-service:
         condition: service_healthy
     ports:
       - "3001:80"
