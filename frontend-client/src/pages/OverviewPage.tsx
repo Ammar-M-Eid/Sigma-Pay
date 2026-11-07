@@ -1,6 +1,6 @@
 import React from 'react';
-import { ArrowDownRight, ArrowUpRight, ArrowsLeftRight, ChartLineUp, CirclesThreePlus, Compass, CreditCard, Receipt, Target, Wallet } from '@phosphor-icons/react';
-import FinancialScene from '../components/FinancialScene';
+import { ArrowDownRight, ArrowUpRight, ChartLineUp, CirclesThreePlus, Compass, CreditCard, Receipt, Target, Wallet } from '@phosphor-icons/react';
+import FinanceVector from '../components/FinanceVector';
 import { Page } from '../components/Header';
 
 interface OverviewPageProps {
@@ -26,12 +26,8 @@ const OverviewPage: React.FC<OverviewPageProps> = ({ onNavigate }) => (
         </div>
         <div className="overview-trust"><span><i className="trust-check">✓</i> Demo data only</span><span><i className="trust-check">✓</i> No real payments</span></div>
       </div>
-      <div className="overview-art" aria-label="Interactive 3D map of money flowing into a budget, a goal and a bill schedule">
-        <div className="art-label art-label-budget"><span>01</span><b>Plan</b><small>Budgets</small></div>
-        <div className="art-label art-label-goal"><span>02</span><b>Grow</b><small>Savings goals</small></div>
-        <div className="art-label art-label-bills"><span>03</span><b>Manage</b><small>Bills & payments</small></div>
-        <FinancialScene kind="overview" title="Interactive money flow" description="A local visual guide connecting a spending plan, a savings goal, and scheduled bills." />
-        <div className="art-instruction"><span>DRAG TO EXPLORE</span><ArrowsLeftRight size={15} aria-hidden="true" /></div>
+      <div className="overview-art">
+        <FinanceVector kind="overview" title="Money flows from income to a budget, a savings goal, and bills" />
       </div>
       <div className="hero-index" aria-hidden="true"><span>01</span><i /></div>
     </section>
