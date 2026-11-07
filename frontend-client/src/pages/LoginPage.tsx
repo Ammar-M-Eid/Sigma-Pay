@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import apiClient from '../api/apiClient';
 
 interface LoginPageProps {
   onLoginSuccess: (userId: string) => void;
@@ -8,6 +9,7 @@ interface LoginPageProps {
 const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onSwitchToRegister }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -41,17 +43,27 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onSwitchToRegiste
     }
 
     setIsLoading(true);
-    // Mock login - in production, this would verify against backend
     try {
-      // Simulate API call
-      const mockUserId = 'user-' + Date.now();
-      setMessage('Login successful!');
-      setTimeout(() => onLoginSuccess(mockUserId), 800);
+      const response = await apiClient.login(email.trim(), password, verificationCode || undefined);
+      if (response.success && response.userId) {
+        setMessage('Login successful.');
+        onLoginSuccess(response.userId);
+      } else {
+        setMessage(response.message || 'Sign in failed. Check your email and password.');
+      }
     } catch (error) {
       setMessage('Login failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleDemoLogin = async () => {
+    setIsLoading(true);
+    const response = await apiClient.demoLogin();
+    if (response.success && response.userId) onLoginSuccess(response.userId);
+    else setMessage(response.message || 'Local demo account is unavailable. Start the services, then retry.');
+    setIsLoading(false);
   };
 
   return (
@@ -79,6 +91,19 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onSwitchToRegiste
               }}
             />
             {errors.email && <p style={styles.errorText}>{errors.email}</p>}
+          </div>
+
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Two-step code <span style={{ fontWeight: 400, color: '#87949b' }}>(if enabled)</span></label>
+            <input
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              value={verificationCode}
+              onChange={(e) => setVerificationCode(e.target.value)}
+              placeholder="6-digit code"
+              style={styles.input}
+            />
           </div>
 
           <div style={styles.formGroup}>
@@ -124,9 +149,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onSwitchToRegiste
           </p>
         )}
 
-        <div style={styles.divider}>
-          <span>Don't have an account?</span>
-        </div>
+        <div style={styles.divider}><span>or use the local workspace</span></div>
+        <button type="button" onClick={handleDemoLogin} disabled={isLoading} style={styles.demoButton}>Continue with demo account</button>
+
+        <div style={styles.divider}><span>Don't have an account?</span></div>
 
         <button
           onClick={onSwitchToRegister}
@@ -135,9 +161,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onSwitchToRegiste
           Create New Account
         </button>
 
-        <p style={styles.disclaimer}>
-          Demo account: Any email/password will work (min 6 chars)
-        </p>
+        <p style={styles.disclaimer}>Demo workspace data is temporary. Payment and identity steps are simulated.</p>
       </div>
     </div>
   );
@@ -260,6 +284,9 @@ const styles: { [key: string]: React.CSSProperties } = {
     borderRadius: '9px',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
+  },
+  demoButton: {
+    width: '100%', padding: '12px', fontSize: '14px', fontWeight: 650, background: '#f1f5ef', color: '#24574c', border: '1px solid #cad9ce', borderRadius: '9px', cursor: 'pointer',
   },
   disclaimer: {
     marginTop: '20px',

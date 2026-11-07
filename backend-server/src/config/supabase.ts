@@ -1,23 +1,23 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
+import path from 'path';
 
 dotenv.config();
-
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_PUBLISHABLE_KEY;
+dotenv.config({ path: path.resolve(__dirname, '../../../.env'), override: false });
 
 let client: SupabaseClient | undefined;
 
 export function hasSupabaseConfig(): boolean {
-  return Boolean(supabaseUrl && supabaseKey);
+  return Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY);
 }
 
 export function getSupabase(): SupabaseClient {
   if (!client) {
-    if (!hasSupabaseConfig()) {
-      throw new Error('SUPABASE_URL and SUPABASE_SECRET_KEY must be configured');
+    const { SUPABASE_URL, SUPABASE_SECRET_KEY } = process.env;
+    if (!SUPABASE_URL || !SUPABASE_SECRET_KEY) {
+      throw new Error('SUPABASE_URL and SUPABASE_SECRET_KEY are required for server-side Supabase access');
     }
-    client = createClient(supabaseUrl as string, supabaseKey as string, {
+    client = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
   }

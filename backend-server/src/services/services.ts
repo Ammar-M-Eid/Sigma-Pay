@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import {
   IAccount,
   IUserAccount,
@@ -10,6 +10,8 @@ import {
   IReport,
   INotification,
   IMoney,
+  ILoginActivity,
+  IBill,
 } from '../domain/entities';
 import {
   IAccountService,
@@ -19,6 +21,8 @@ import {
   IPaymentsServiceBL,
   IReportingService,
   INotificationServiceBL,
+  ILoginActivityService,
+  IBillService,
 } from '../domain/serviceInterfaces';
 import {
   IAccountsRepository,
@@ -29,6 +33,8 @@ import {
   IPaymentRepository,
   IGroupSavingsRepository,
   INotificationRepository,
+  ILoginActivityRepository,
+  IBillRepository,
 } from '../domain/repositoryInterfaces';
 
 // Service Implementations - Business Logic Layer
@@ -51,13 +57,41 @@ export class AccountService implements IAccountService {
     this.accountsRepository.save(account);
   }
 
+  saveUser(user: IUserAccount): string {
+    return this.userRepository.save(user);
+  }
+
+  findUserByEmail(email: string): IUserAccount | null {
+    return this.userRepository.findByEmail(email);
+  }
+
+  findUserByUsername(username: string): IUserAccount | null {
+    return this.userRepository.findByUsername(username);
+  }
+
+  findUserByPhone(phone: string): IUserAccount | null {
+    return this.userRepository.findByPhone(phone);
+  }
+
   deleteAccount(accountId: string): void {
-    // In a real implementation, this would delete the account
-    // For mock, we'll just skip it
+    this.accountsRepository.deleteByUserId(accountId);
+    this.userRepository.delete(accountId);
   }
 
   getUserAccount(userId: string): IUserAccount | null {
     return this.userRepository.findById(userId);
+  }
+}
+
+export class LoginActivityService implements ILoginActivityService {
+  constructor(private activityRepository: ILoginActivityRepository) {}
+
+  record(activity: ILoginActivity): void {
+    this.activityRepository.save(activity);
+  }
+
+  getByUserId(userId: string): ILoginActivity[] {
+    return this.activityRepository.findByUserId(userId);
   }
 }
 
@@ -88,11 +122,15 @@ export class BudgetService implements IBudgetService {
   }
 
   recordExpense(userId: string, amount: number, category: string): boolean {
+    if (!Number.isFinite(amount) || amount <= 0 || !category.trim()) return false;
     const budgets = this.budgetRepository.findByUserId(userId);
-    if (budgets.length > 0) {
+    const isIncome = category.trim().toLowerCase() === 'income';
+    if (isIncome || budgets.length > 0) {
+      if (!isIncome) {
       const budget = budgets[0];
       budget.spent += amount;
       this.budgetRepository.save(budget);
+      }
 
       // Create transaction record
       const transaction = {
@@ -123,6 +161,19 @@ export class BudgetService implements IBudgetService {
     }
     return null;
   }
+
+  getBudgetsByUserId(userId: string): IBudgetPlan[] {
+    return this.budgetRepository.findByUserId(userId);
+  }
+
+  getSpendingTrends(userId: string): Array<{ category: string; amount: number; currency: string }> {
+    const totals = new Map<string, number>();
+    for (const transaction of this.transactionRepository.findByUserId(userId)) {
+      if (transaction.category.toLowerCase() === 'income') continue;
+      totals.set(transaction.category, (totals.get(transaction.category) ?? 0) + transaction.amount.amount);
+    }
+    return [...totals.entries()].map(([category, amount]) => ({ category, amount, currency: 'USD' }));
+  }
 }
 
 export class GoalService implements IGoalService {
@@ -141,6 +192,14 @@ export class GoalService implements IGoalService {
 
   updateGoal(goal: IFinancialGoal): void {
     this.goalRepository.save(goal);
+  }
+
+  getGoal(goalId: string): IFinancialGoal | null {
+    return this.goalRepository.findById(goalId);
+  }
+
+  getGoalsByUserId(userId: string): IFinancialGoal[] {
+    return this.goalRepository.findByUserId(userId);
   }
 
   trackProgress(goalId: string): IGoalProgress | null {
@@ -230,8 +289,12 @@ export class PaymentsServiceBL implements IPaymentsServiceBL {
   }
 
   scheduleRecurringPayment(payment: IPayment, schedule: any): string {
-    // Mock implementation
-    return uuidv4();
+    payment.paymentId ||= uuidv4();
+    payment.state = 'Scheduled';
+    payment.timestamp = new Date().toISOString();
+    payment.recurrenceFrequency = schedule.frequency;
+    payment.nextRunAt = schedule.nextRunAt;
+    return this.paymentRepository.save(payment);
   }
 
   cancelPayment(paymentId: string): void {
@@ -251,28 +314,73 @@ export class PaymentsServiceBL implements IPaymentsServiceBL {
     }
     return { success: false, message: 'Payment not found' };
   }
+
+  getPaymentsByUserId(userId: string): IPayment[] {
+    return this.paymentRepository.findByUserId(userId);
+  }
+}
+
+export class BillService implements IBillService {
+  constructor(private billRepository: IBillRepository) {}
+
+  createBill(bill: IBill): string {
+    bill.status = 'Scheduled';
+    return this.billRepository.save(bill);
+  }
+
+  getBillsByUserId(userId: string): IBill[] {
+    return this.billRepository.findByUserId(userId);
+  }
+
+  payBill(billId: string, userId: string): IBill | null {
+    const bill = this.billRepository.findById(billId);
+    if (!bill || bill.userId !== userId || bill.status !== 'Scheduled') return null;
+    bill.status = 'Paid';
+    bill.paidAt = new Date().toISOString();
+    this.billRepository.save(bill);
+    return bill;
+  }
 }
 
 export class ReportingService implements IReportingService {
   constructor(private transactionRepository: ITransactionRepository) {}
 
   generateReport(filter: any, type: string): IReport | null {
+    if (!filter?.userId || !['monthly', 'income', 'spending'].includes(type)) return null;
+    const start = filter.startDate ? new Date(`${filter.startDate}T00:00:00`).getTime() : Number.NEGATIVE_INFINITY;
+    const end = filter.endDate ? new Date(`${filter.endDate}T23:59:59.999`).getTime() : Number.POSITIVE_INFINITY;
+    if ((Number.isNaN(start) && filter.startDate) || (Number.isNaN(end) && filter.endDate) || start > end) return null;
+    const transactions = this.transactionRepository.findByUserId(filter.userId).filter((transaction) => {
+      const date = new Date(transaction.date).getTime();
+      return date >= start && date <= end;
+    });
+    const income = transactions.filter((transaction) => transaction.category.toLowerCase() === 'income').reduce((sum, transaction) => sum + transaction.amount.amount, 0);
+    const expenses = transactions.filter((transaction) => transaction.category.toLowerCase() !== 'income');
+    const spent = expenses.reduce((sum, transaction) => sum + transaction.amount.amount, 0);
+    const categoryTotals = new Map<string, number>();
+    expenses.forEach((transaction) => categoryTotals.set(transaction.category, (categoryTotals.get(transaction.category) ?? 0) + transaction.amount.amount));
+    const range = `${filter.startDate ?? 'all'} to ${filter.endDate ?? 'date'}`;
+    const content = type === 'income'
+      ? `Income statement (${range})\nIncome: $${income.toFixed(2)}\nExpenses: $${spent.toFixed(2)}\nNet: $${(income - spent).toFixed(2)}`
+      : type === 'spending'
+        ? `Spending report (${range})\nTransactions: ${expenses.length}\nTotal spent: $${spent.toFixed(2)}\nBy category:\n${[...categoryTotals].map(([category, amount]) => `${category}: $${amount.toFixed(2)}`).join('\n') || 'No spending recorded.'}`
+        : `Activity summary (${range})\nExpense transactions: ${expenses.length}\nIncome transactions: ${transactions.length - expenses.length}\nTotal spent: $${spent.toFixed(2)}\nIncome recorded: $${income.toFixed(2)}`;
     return {
       reportId: uuidv4(),
       userId: filter.userId,
       reportType: type,
       generatedAt: new Date().toISOString(),
-      content: 'Mock report content',
+      content,
     };
   }
 
   generateIncomeStatement(userId: string): string {
     const transactions = this.transactionRepository.findByUserId(userId);
     const totalIncome = transactions
-      .filter((t) => t.category === 'income')
+      .filter((t) => t.category.toLowerCase() === 'income')
       .reduce((sum, t) => sum + t.amount.amount, 0);
     const totalExpenses = transactions
-      .filter((t) => t.category !== 'income')
+      .filter((t) => t.category.toLowerCase() !== 'income')
       .reduce((sum, t) => sum + t.amount.amount, 0);
 
     return `Income Statement for User ${userId}\nTotal Income: $${totalIncome}\nTotal Expenses: $${totalExpenses}\nNet: $${totalIncome - totalExpenses}`;
@@ -280,7 +388,8 @@ export class ReportingService implements IReportingService {
 
   generateMonthlySummary(userId: string): string {
     const transactions = this.transactionRepository.findByUserId(userId);
-    return `Monthly Summary for User ${userId}\nTotal Transactions: ${transactions.length}\nTotal Spent: $${transactions.reduce((sum, t) => sum + t.amount.amount, 0)}`;
+    const expenses = transactions.filter((t) => t.category.toLowerCase() !== 'income');
+    return `Monthly Summary for User ${userId}\nExpense Transactions: ${expenses.length}\nTotal Spent: $${expenses.reduce((sum, t) => sum + t.amount.amount, 0)}`;
   }
 
   exportToPDF(report: IReport): Buffer {

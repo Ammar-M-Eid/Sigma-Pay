@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import {
   IAccount,
   IUserAccount,
@@ -8,6 +8,8 @@ import {
   IPayment,
   IGroupSavings,
   INotification,
+  ILoginActivity,
+  IBill,
 } from '../domain/entities';
 import {
   IAccountsRepository,
@@ -18,28 +20,9 @@ import {
   IPaymentRepository,
   IGroupSavingsRepository,
   INotificationRepository,
+  ILoginActivityRepository,
+  IBillRepository,
 } from '../domain/repositoryInterfaces';
-
-// PATTERN: Singleton - DatabaseConnectionPool (simulated with in-memory stores)
-export class DatabaseConnectionPool {
-  private static instance: DatabaseConnectionPool;
-  private connections: Map<string, any>;
-
-  private constructor() {
-    this.connections = new Map();
-  }
-
-  public static getInstance(): DatabaseConnectionPool {
-    if (!DatabaseConnectionPool.instance) {
-      DatabaseConnectionPool.instance = new DatabaseConnectionPool();
-    }
-    return DatabaseConnectionPool.instance;
-  }
-
-  public getConnection(): any {
-    return { connected: true };
-  }
-}
 
 // Repository Implementations with in-memory storage
 
@@ -75,6 +58,17 @@ export class UserRepositoryImpl implements IUserRepository {
     }
     return null;
   }
+
+  findByPhone(phone: string): IUserAccount | null {
+    for (const user of this.users.values()) {
+      if (user.profile.phone === phone) {
+        return user;
+      }
+    }
+    return null;
+  }
+
+  delete(userId: string): boolean { return this.users.delete(userId); }
 }
 
 export class AccountsRepositoryImpl implements IAccountsRepository {
@@ -99,6 +93,26 @@ export class AccountsRepositoryImpl implements IAccountsRepository {
       }
     }
     return null;
+  }
+
+  deleteByUserId(userId: string): boolean {
+    const account = this.findByUserId(userId);
+    return account ? this.accounts.delete(account.accountId) : false;
+  }
+}
+
+export class LoginActivityRepositoryImpl implements ILoginActivityRepository {
+  private activities = new Map<string, ILoginActivity[]>();
+
+  save(activity: ILoginActivity): string {
+    const history = this.activities.get(activity.userId ?? activity.email) ?? [];
+    history.unshift(activity);
+    this.activities.set(activity.userId ?? activity.email, history.slice(0, 50));
+    return activity.activityId;
+  }
+
+  findByUserId(userId: string): ILoginActivity[] {
+    return [...(this.activities.get(userId) ?? [])];
   }
 }
 
@@ -203,6 +217,24 @@ export class PaymentRepositoryImpl implements IPaymentRepository {
       }
     }
     return userPayments;
+  }
+}
+
+export class BillRepositoryImpl implements IBillRepository {
+  private bills = new Map<string, IBill>();
+
+  save(bill: IBill): string {
+    if (!bill.billId) bill.billId = uuidv4();
+    this.bills.set(bill.billId, bill);
+    return bill.billId;
+  }
+
+  findById(billId: string): IBill | null {
+    return this.bills.get(billId) ?? null;
+  }
+
+  findByUserId(userId: string): IBill[] {
+    return [...this.bills.values()].filter((bill) => bill.userId === userId);
   }
 }
 
