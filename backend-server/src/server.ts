@@ -1,11 +1,14 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 import { Controller, createApiRouter } from './api/controller';
+import { IUserAccount } from './domain/entities';
 import {
   AccountService,
   BudgetService,
   GoalService,
   GroupSavingsService,
+  BillService,
+  LoginActivityService,
   PaymentsServiceBL,
   ReportingService,
   NotificationServiceBL,
@@ -19,10 +22,20 @@ import {
   PaymentRepositoryImpl,
   GroupSavingsRepositoryImpl,
   NotificationRepositoryImpl,
+  BillRepositoryImpl,
+  LoginActivityRepositoryImpl,
   DatabaseConnectionPool,
 } from './data/repositories';
 
 const PORT = Number(process.env.PORT ?? 3001);
+const SERVICE_DOMAIN = process.env.SERVICE_DOMAIN ?? 'all';
+const DOMAIN_PREFIXES: Record<string, string[]> = {
+  identity: ['/accounts'],
+  finance: ['/budgets', '/goals', '/reports'],
+  savings: ['/groups'],
+  payments: ['/payments', '/bills'],
+  notifications: ['/notifications'],
+};
 
 // Initialize the application following the layered architecture
 function initializeApp(): Application {
@@ -46,6 +59,23 @@ function initializeApp(): Application {
   const paymentRepository = new PaymentRepositoryImpl();
   const groupSavingsRepository = new GroupSavingsRepositoryImpl();
   const notificationRepository = new NotificationRepositoryImpl();
+  const billRepository = new BillRepositoryImpl();
+  const loginActivityRepository = new LoginActivityRepositoryImpl();
+
+  if (SERVICE_DOMAIN === 'identity' || SERVICE_DOMAIN === 'all') {
+    const demoUser: IUserAccount = {
+      userId: 'demo-user',
+      credentials: { username: 'demo', passwordHash: 'demo-login-only' },
+      profile: { email: 'demo@example.invalid', phone: '201000000000', address: 'Local demo profile' },
+      securitySettings: { twoFactorEnabled: false, accountStatus: 'Active' },
+    };
+    userRepository.save(demoUser);
+    accountsRepository.save({
+      accountId: 'demo-account',
+      userId: 'demo-user',
+      balance: { amount: 0, currency: { code: 'USD', symbol: '$', exchangeRate: 1 } },
+    });
+  }
 
   console.log('Repositories initialized with in-memory storage');
 
@@ -57,6 +87,8 @@ function initializeApp(): Application {
   const paymentsService = new PaymentsServiceBL(paymentRepository);
   const reportingService = new ReportingService(transactionRepository);
   const notificationService = new NotificationServiceBL(notificationRepository);
+  const billService = new BillService(billRepository);
+  const loginActivityService = new LoginActivityService(loginActivityRepository);
 
   console.log('Services initialized with repository dependencies');
 
@@ -68,13 +100,34 @@ function initializeApp(): Application {
     groupSavingsService,
     paymentsService,
     reportingService,
-    notificationService
+    notificationService,
+    loginActivityService,
+    billService
   );
 
   console.log('Controller initialized with service dependencies');
 
   // API ROUTES - Register Express routes
   const apiRouter = createApiRouter(controller);
+  if (SERVICE_DOMAIN !== 'all') {
+    const allowedPrefixes = DOMAIN_PREFIXES[SERVICE_DOMAIN];
+    if (!allowedPrefixes) {
+      throw new Error(`Unknown SERVICE_DOMAIN: ${SERVICE_DOMAIN}`);
+    }
+    app.use('/api', (req, res, next) => {
+      // Express may expose the pre-mount or router-relative pathname depending on
+      // the middleware stack; normalize both forms before applying the domain guard.
+      const requestPath = req.path.replace(/^\/api(?=\/)/, '');
+      const ownsRoute = allowedPrefixes.some(
+        (prefix) => requestPath === prefix || requestPath.startsWith(`${prefix}/`)
+      );
+      if (!ownsRoute) {
+        res.status(404).json({ success: false, message: 'Route is not owned by this service' });
+        return;
+      }
+      next();
+    });
+  }
   app.use('/api', apiRouter);
 
   // Health check endpoint
@@ -82,7 +135,8 @@ function initializeApp(): Application {
     res.json({
       status: 'ok',
       database: 'memory',
-      message: 'SigmaPay backend is running in demo mode; data is not persisted to Supabase',
+      service: SERVICE_DOMAIN,
+      message: 'SigmaPay service is running in demo mode; data is process-local and not persisted to Supabase',
     });
   });
 

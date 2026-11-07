@@ -8,6 +8,8 @@ import {
   IPayment,
   IReport,
   INotification,
+  ILoginActivity,
+  IBill,
 } from './entities';
 
 // Service Interfaces - matching UML diagram
@@ -17,7 +19,16 @@ export interface IAccountService {
   getAccount(accountId: string): IAccount | null;
   updateAccount(account: IAccount): void;
   deleteAccount(accountId: string): void;
+  saveUser(user: IUserAccount): string;
+  findUserByEmail(email: string): IUserAccount | null;
+  findUserByUsername(username: string): IUserAccount | null;
+  findUserByPhone(phone: string): IUserAccount | null;
   getUserAccount(userId: string): IUserAccount | null;
+}
+
+export interface ILoginActivityService {
+  record(activity: ILoginActivity): void;
+  getByUserId(userId: string): ILoginActivity[];
 }
 
 export interface IBudgetService {
@@ -27,6 +38,8 @@ export interface IBudgetService {
   getBudget(budgetId: string): IBudgetPlan | null;
   recordExpense(userId: string, amount: number, category: string): boolean;
   analyzeSpending(budgetId: string): any;
+  getBudgetsByUserId(userId: string): IBudgetPlan[];
+  getSpendingTrends(userId: string): Array<{ category: string; amount: number; currency: string }>;
 }
 
 export interface IGoalService {
@@ -34,6 +47,8 @@ export interface IGoalService {
   updateGoal(goal: IFinancialGoal): void;
   trackProgress(goalId: string): IGoalProgress | null;
   contributeToGoal(goalId: string, amount: number): void;
+  getGoal(goalId: string): IFinancialGoal | null;
+  getGoalsByUserId(userId: string): IFinancialGoal[];
 }
 
 export interface IGroupSavingsService {
@@ -48,6 +63,13 @@ export interface IPaymentsServiceBL {
   scheduleRecurringPayment(payment: IPayment, schedule: any): string;
   cancelPayment(paymentId: string): void;
   refundPayment(paymentId: string): any;
+  getPaymentsByUserId(userId: string): IPayment[];
+}
+
+export interface IBillService {
+  createBill(bill: IBill): string;
+  getBillsByUserId(userId: string): IBill[];
+  payBill(billId: string, userId: string): IBill | null;
 }
 
 export interface IReportingService {

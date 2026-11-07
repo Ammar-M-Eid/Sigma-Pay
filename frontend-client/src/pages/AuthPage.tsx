@@ -80,10 +80,9 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
     try {
       const response = await apiClient.register(username, email, password, phoneNumber);
 
-      if (response.success) {
-        setMessage('Account created successfully! Logging you in...');
-        const mockUserId = 'user-' + Date.now();
-        setTimeout(() => onLoginSuccess(mockUserId), 1500);
+      if (response.success && response.userId) {
+        setMessage('Account created successfully.');
+        onLoginSuccess(response.userId);
       } else {
         setMessage('Failed to create account: ' + (response.message || 'Unknown error'));
       }

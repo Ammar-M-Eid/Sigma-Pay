@@ -1,248 +1,36 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import apiClient from '../api/apiClient';
 
-interface PaymentsPageProps {
-  userId: string;
-}
+interface PaymentsPageProps { userId: string; }
+type Payment = { paymentId: string; amount: { amount: number }; methodId: string; merchantId?: string; state: string; timestamp: string; recurrenceFrequency?: string; nextRunAt?: string };
+const currency = (amount: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount || 0);
 
 const PaymentsPage: React.FC<PaymentsPageProps> = ({ userId }) => {
-  const [methodId, setMethodId] = useState('card');
-  const [amount, setAmount] = useState('');
-  const [merchantId, setMerchantId] = useState('');
-  const [verifyMethodId, setVerifyMethodId] = useState('');
-  const [CVV, setCVV] = useState('');
-  const [transactionId, setTransactionId] = useState('');
-  const [refundAmount, setRefundAmount] = useState('');
-  const [refundReason, setRefundReason] = useState('');
-  const [message, setMessage] = useState('');
+  const [amount, setAmount] = useState(''); const [merchant, setMerchant] = useState(''); const [method, setMethod] = useState('demo-card');
+  const [frequency, setFrequency] = useState('monthly'); const [nextRun, setNextRun] = useState('');
+  const [paymentId, setPaymentId] = useState(''); const [refundAmount, setRefundAmount] = useState(''); const [reason, setReason] = useState('');
+  const [verificationId, setVerificationId] = useState(''); const [cvv, setCvv] = useState(''); const [payments, setPayments] = useState<Payment[]>([]); const [message, setMessage] = useState('');
+  const refresh = useCallback(async () => { const result = await apiClient.getPaymentHistory(userId); setPayments(result.payments || []); }, [userId]);
+  useEffect(() => { refresh(); }, [refresh]);
 
-  const handleProcessPayment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const response = await apiClient.processPayment(userId, methodId, parseFloat(amount), merchantId);
-    setMessage(response.success ? 'Payment processed successfully!' : 'Failed to process payment');
-    if (response.success) {
-      setAmount('');
-      setMerchantId('');
-    }
-  };
+  const process = async (event: React.FormEvent) => { event.preventDefault(); const result = await apiClient.processPayment(userId, method, Number(amount), merchant); setMessage(result.success ? 'Demo payment recorded. No money was moved.' : result.message || 'Could not process demo payment.'); if (result.success) { setAmount(''); setMerchant(''); await refresh(); } };
+  const schedule = async (event: React.FormEvent) => { event.preventDefault(); const result = await apiClient.scheduleRecurringPayment(userId, method, Number(amount), merchant, frequency, new Date(nextRun).toISOString()); setMessage(result.success ? 'Recurring demo payment scheduled.' : result.message || 'Could not schedule payment.'); if (result.success) { setAmount(''); setMerchant(''); await refresh(); } };
+  const verify = async (event: React.FormEvent) => { event.preventDefault(); const result = await apiClient.verifyPaymentMethod(userId, verificationId, cvv); setMessage(result.message || (result.success ? 'Demo payment method verified.' : 'Verification failed.')); if (result.success) setCvv(''); };
+  const refund = async (event: React.FormEvent) => { event.preventDefault(); const result = await apiClient.requestRefund(userId, paymentId, Number(refundAmount), reason); setMessage(result.success ? 'Refund marked in the payment demo.' : result.message || 'Could not issue refund. Check the transaction and amount.'); if (result.success) { setPaymentId(''); setRefundAmount(''); setReason(''); await refresh(); } };
+  const cancel = async (id: string) => { const result = await apiClient.cancelRecurringPayment(id, userId); setMessage(result.message || (result.success ? 'Schedule cancelled.' : 'Could not cancel schedule.')); await refresh(); };
 
-  const handleVerifyPaymentMethod = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const response = await apiClient.verifyPaymentMethod(userId, verifyMethodId, CVV);
-    setMessage(response.success ? 'Payment method verified!' : 'Failed to verify payment method');
-    if (response.success) {
-      setCVV('');
-    }
-  };
-
-  const handleRequestRefund = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const response = await apiClient.requestRefund(userId, transactionId, parseFloat(refundAmount), refundReason);
-    setMessage(response.success ? 'Refund requested successfully!' : 'Failed to request refund');
-    if (response.success) {
-      setTransactionId('');
-      setRefundAmount('');
-      setRefundReason('');
-    }
-  };
-
-  return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>Payments</h1>
-
-      <div style={styles.section}>
-        <h2 style={styles.subtitle}>Process Payment</h2>
-        <form onSubmit={handleProcessPayment} style={styles.form}>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Payment Method:</label>
-            <select
-              value={methodId}
-              onChange={(e) => setMethodId(e.target.value)}
-              style={styles.input}
-            >
-              <option value="card">Credit/Debit Card</option>
-              <option value="wallet">Digital Wallet</option>
-              <option value="bank">Bank Transfer</option>
-            </select>
-          </div>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Amount ($):</label>
-            <input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              required
-              style={styles.input}
-              step="0.01"
-            />
-          </div>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Merchant ID:</label>
-            <input
-              type="text"
-              value={merchantId}
-              onChange={(e) => setMerchantId(e.target.value)}
-              required
-              style={styles.input}
-            />
-          </div>
-          <button type="submit" style={styles.button}>
-            Process Payment
-          </button>
-        </form>
-      </div>
-
-      <div style={styles.section}>
-        <h2 style={styles.subtitle}>Verify Payment Method</h2>
-        <form onSubmit={handleVerifyPaymentMethod} style={styles.form}>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Payment Method ID:</label>
-            <input
-              type="text"
-              value={verifyMethodId}
-              onChange={(e) => setVerifyMethodId(e.target.value)}
-              required
-              style={styles.input}
-            />
-          </div>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>CVV:</label>
-            <input
-              type="text"
-              value={CVV}
-              onChange={(e) => setCVV(e.target.value)}
-              required
-              style={styles.input}
-              maxLength={4}
-            />
-          </div>
-          <button type="submit" style={styles.button}>
-            Verify Payment Method
-          </button>
-        </form>
-      </div>
-
-      <div style={styles.section}>
-        <h2 style={styles.subtitle}>Request Refund</h2>
-        <form onSubmit={handleRequestRefund} style={styles.form}>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Transaction ID:</label>
-            <input
-              type="text"
-              value={transactionId}
-              onChange={(e) => setTransactionId(e.target.value)}
-              required
-              style={styles.input}
-            />
-          </div>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Refund Amount ($):</label>
-            <input
-              type="number"
-              value={refundAmount}
-              onChange={(e) => setRefundAmount(e.target.value)}
-              required
-              style={styles.input}
-              step="0.01"
-            />
-          </div>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Reason:</label>
-            <textarea
-              value={refundReason}
-              onChange={(e) => setRefundReason(e.target.value)}
-              required
-              style={{ ...styles.input, minHeight: '80px' }}
-            />
-          </div>
-          <button type="submit" style={styles.button}>
-            Request Refund
-          </button>
-        </form>
-      </div>
-
-      {message && <p style={styles.message}>{message}</p>}
+  return <div className="workflow-page">
+    <div className="module-heading"><div><span className="eyebrow">SAFE SANDBOX</span><h1>Payments</h1></div><p>Try payment, verification, refund and recurring-payment flows with sample details only. No provider is connected.</p></div>
+    <div className="payment-sandbox-note"><strong>Demo mode</strong><span>Never enter a real card number, CVV, bank account or payment credential.</span></div>
+    <div className="workflow-grid">
+      <section className="workflow-panel"><div className="panel-heading"><span className="eyebrow">ONE-TIME</span><h2>Record a demo payment</h2></div><form className="bill-form" onSubmit={process}><label>Merchant name<input value={merchant} onChange={(event) => setMerchant(event.target.value)} required placeholder="Sample merchant" /></label><label>Amount<input type="number" min="0.01" step="0.01" value={amount} onChange={(event) => setAmount(event.target.value)} required placeholder="0.00" /></label><label>Demo method<select value={method} onChange={(event) => setMethod(event.target.value)}><option value="demo-card">Sample card</option><option value="demo-wallet">Sample wallet</option><option value="demo-bank">Sample transfer</option></select></label><button className="button-primary" type="submit">Record payment</button></form></section>
+      <section className="workflow-panel"><div className="panel-heading"><span className="eyebrow">AUTOMATION</span><h2>Recurring schedule</h2></div><form className="bill-form" onSubmit={schedule}><label>Merchant<input value={merchant} onChange={(event) => setMerchant(event.target.value)} required placeholder="Sample merchant" /></label><label>Amount<input type="number" min="0.01" step="0.01" value={amount} onChange={(event) => setAmount(event.target.value)} required placeholder="0.00" /></label><div className="form-two-column"><label>Frequency<select value={frequency} onChange={(event) => setFrequency(event.target.value)}><option value="weekly">Weekly</option><option value="monthly">Monthly</option><option value="quarterly">Quarterly</option><option value="yearly">Yearly</option></select></label><label>First run<input type="date" value={nextRun} onChange={(event) => setNextRun(event.target.value)} required /></label></div><button className="button-outline" type="submit">Schedule demo payment</button></form></section>
+      <section className="workflow-panel"><div className="panel-heading"><span className="eyebrow">METHOD SETUP</span><h2>Verify sample method</h2></div><form className="bill-form" onSubmit={verify}><label>Sample method ID<input value={verificationId} onChange={(event) => setVerificationId(event.target.value)} required /></label><label>Sample verification value<input inputMode="numeric" maxLength={4} value={cvv} onChange={(event) => setCvv(event.target.value)} required /></label><button className="button-outline" type="submit">Verify in demo</button></form></section>
+      <section className="workflow-panel"><div className="panel-heading"><span className="eyebrow">REVERSAL</span><h2>Request a refund</h2></div><form className="bill-form" onSubmit={refund}><label>Payment ID<input value={paymentId} onChange={(event) => setPaymentId(event.target.value)} required /></label><label>Full original amount<input type="number" min="0.01" step="0.01" value={refundAmount} onChange={(event) => setRefundAmount(event.target.value)} required /></label><label>Reason<input value={reason} onChange={(event) => setReason(event.target.value)} required /></label><p className="form-disclaimer">The demo supports full refunds only for completed payments in this session.</p><button className="button-outline" type="submit">Refund payment</button></form></section>
     </div>
-  );
-};
-
-const styles: { [key: string]: React.CSSProperties } = {
-  container: {
-    maxWidth: '900px',
-    margin: '30px auto',
-    padding: '30px',
-  },
-  title: {
-    textAlign: 'center',
-    color: 'white',
-    marginBottom: '40px',
-    fontSize: '36px',
-    fontWeight: 'bold',
-    textShadow: '2px 2px 4px rgba(0, 0, 0, 0.2)',
-  },
-  section: {
-    background: 'white',
-    padding: '30px',
-    borderRadius: '16px',
-    marginBottom: '24px',
-    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)',
-    animation: 'fadeInUp 0.5s ease',
-  },
-  subtitle: {
-    color: '#2d3748',
-    marginBottom: '24px',
-    fontSize: '22px',
-    fontWeight: '600',
-    borderBottom: '3px solid #FF5722',
-    paddingBottom: '10px',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  formGroup: {
-    marginBottom: '20px',
-  },
-  label: {
-    display: 'block',
-    marginBottom: '8px',
-    fontWeight: '600',
-    color: '#4a5568',
-    fontSize: '14px',
-  },
-  input: {
-    width: '100%',
-    padding: '14px 16px',
-    fontSize: '16px',
-    border: '2px solid #e2e8f0',
-    borderRadius: '10px',
-    boxSizing: 'border-box',
-    transition: 'all 0.3s ease',
-    backgroundColor: '#f7fafc',
-  },
-  button: {
-    padding: '16px',
-    fontSize: '17px',
-    background: 'linear-gradient(135deg, #FF5722 0%, #E64A19 100%)',
-    color: 'white',
-    border: 'none',
-    borderRadius: '10px',
-    cursor: 'pointer',
-    marginTop: '12px',
-    fontWeight: '600',
-    boxShadow: '0 4px 15px rgba(255, 87, 34, 0.4)',
-  },
-  message: {
-    marginTop: '24px',
-    padding: '16px',
-    background: 'linear-gradient(135deg, #ffccbc 0%, #ff8a65 100%)',
-    border: 'none',
-    borderRadius: '10px',
-    textAlign: 'center',
-    color: '#2d3748',
-    fontWeight: '500',
-    boxShadow: '0 4px 12px rgba(255, 87, 34, 0.2)',
-  },
+    <section className="workflow-panel activity-panel"><div className="panel-heading panel-heading-row"><div><span className="eyebrow">THIS SESSION</span><h2>Payment activity</h2></div><button className="button-quiet" type="button" onClick={refresh}>Refresh</button></div>{payments.length === 0 ? <div className="empty-state"><strong>No payments recorded</strong><p>Sample activity appears after you use one of the demo payment flows.</p></div> : <ul className="payment-list">{payments.map((payment) => <li key={payment.paymentId}><div><strong>{payment.merchantId || 'Payment'}</strong><small>{payment.paymentId} · {new Date(payment.timestamp).toLocaleString()}</small></div><div className="payment-right"><strong>{currency(payment.amount?.amount)}</strong><span>{payment.recurrenceFrequency ? `${payment.recurrenceFrequency} · next ${payment.nextRunAt ? new Date(payment.nextRunAt).toLocaleDateString() : 'pending'}` : payment.state}</span>{payment.state === 'Scheduled' && <button className="text-button" type="button" onClick={() => cancel(payment.paymentId)}>Cancel</button>}</div></li>)}</ul>}</section>
+    {message && <p className="inline-message" role="status">{message}</p>}
+  </div>;
 };
 
 export default PaymentsPage;
