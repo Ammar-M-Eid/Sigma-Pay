@@ -130,7 +130,7 @@ const App: React.FC = () => {
       <section className="module-intro">
         <div className="module-intro-copy">
           <span className="section-kicker">SigmaPay · {currentPage === 'groups' ? 'Group savings' : currentPage.charAt(0).toUpperCase() + currentPage.slice(1)}</span>
-          <h1>{pageIllustrations[currentPage].title}</h1>
+          <h1 className="heading-3">{pageIllustrations[currentPage].title}</h1>
           <p>{pageIllustrations[currentPage].description}</p>
         </div>
         <FinanceVector kind={pageIllustrations[currentPage].kind} title={`${currentPage} illustration`} />
@@ -162,7 +162,7 @@ const App: React.FC = () => {
         <main id="main-content" className="main-content page-transition" key={currentPage}>
           {section}
         </main>
-        <footer className="app-footer"><span>SigmaPay</span><span>Planning tools for a clearer view of your money.</span></footer>
+        <footer className="app-footer"><span>SigmaPay</span><span>Planning tools for a clearer view of your money.</span><nav aria-label="Legal"><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></nav></footer>
       </div>
     </div>
   );

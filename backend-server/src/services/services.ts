@@ -279,6 +279,9 @@ export class PaymentsServiceBL implements IPaymentsServiceBL {
   constructor(private paymentRepository: IPaymentRepository) {}
 
   processPayment(payment: IPayment): any {
+    if (payment.state !== 'Pending') {
+      return { success: false, message: 'Payment must be pending before processing' };
+    }
     if (!payment.paymentId) {
       payment.paymentId = uuidv4();
     }
@@ -288,7 +291,8 @@ export class PaymentsServiceBL implements IPaymentsServiceBL {
     return { success: true, paymentId: payment.paymentId };
   }
 
-  scheduleRecurringPayment(payment: IPayment, schedule: any): string {
+  scheduleRecurringPayment(payment: IPayment, schedule: any): string | null {
+    if (payment.state !== 'Pending') return null;
     payment.paymentId ||= uuidv4();
     payment.state = 'Scheduled';
     payment.timestamp = new Date().toISOString();
@@ -297,22 +301,22 @@ export class PaymentsServiceBL implements IPaymentsServiceBL {
     return this.paymentRepository.save(payment);
   }
 
-  cancelPayment(paymentId: string): void {
+  cancelPayment(paymentId: string): boolean {
     const payment = this.paymentRepository.findById(paymentId);
-    if (payment) {
-      payment.state = 'Cancelled';
-      this.paymentRepository.save(payment);
-    }
+    if (!payment || payment.state !== 'Scheduled') return false;
+    payment.state = 'Cancelled';
+    this.paymentRepository.save(payment);
+    return true;
   }
 
   refundPayment(paymentId: string): any {
     const payment = this.paymentRepository.findById(paymentId);
-    if (payment) {
+    if (payment?.state === 'Completed') {
       payment.state = 'Refunded';
       this.paymentRepository.save(payment);
       return { success: true, message: 'Refund processed' };
     }
-    return { success: false, message: 'Payment not found' };
+    return { success: false, message: payment ? 'Only completed payments can be refunded' : 'Payment not found' };
   }
 
   getPaymentsByUserId(userId: string): IPayment[] {

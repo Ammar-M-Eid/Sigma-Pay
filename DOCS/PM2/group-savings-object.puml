@@ -1,0 +1,23 @@
+@startuml
+title Object snapshot: member contributes to a savings group
+object "page: GroupSavingsPage" as page
+object "api: apiClient" as api
+object "route: POST /groups/G-104/deposit" as route
+object "controller: SigmaPayController" as controller
+object "service: GroupSavingsService" as service
+object "repository: GroupSavingsRepositoryImpl" as repo
+object "group: IGroupSavings" as group {
+  groupId = "G-104"
+  groupName = "Family trip"
+  targetAmount = 12000 EGP
+  currentAmount = 2400 EGP
+  members = [U-7, U-9]
+  currency = EGP, E£, exchangeRate 1
+}
+page -- api
+api -- route
+route -- controller
+controller -- service
+service -- repo
+repo -- group
+@enduml

@@ -1,0 +1,13 @@
+@startuml
+title Contribute to a savings goal
+actor Customer
+participant "GoalService" as S
+participant "GoalRepositoryImpl" as R
+Customer -> S : contributeToGoal("G-23", 500)
+S -> R : findById("G-23")
+R --> S : G-23 (Active, 4500/5000 EGP)
+S -> S : add 500; state = Completed
+S -> R : save(G-23)
+R --> S : "G-23"
+S --> Customer : void
+@enduml

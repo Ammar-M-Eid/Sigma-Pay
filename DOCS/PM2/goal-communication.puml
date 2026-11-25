@@ -1,0 +1,17 @@
+@startuml
+title Goal completion communication
+object "customer:Customer" as C
+object "service:GoalService" as S
+object "repository:GoalRepositoryImpl" as R
+object "goal:G-23" as G
+C -> S : 1: contributeToGoal("G-23", 500)
+S -> R : 1.1: findById("G-23")
+R --> S : 1.2: goal G-23
+S -> G : 1.3: currentAmount += 500; state = Completed
+S -> R : 1.4: save(G-23)
+R --> S : 1.5: "G-23"
+S --> C : 2: return
+note bottom
+Links match system-service-classes.puml. Fixture and repository calls are checked in goal-scenario.test.cjs.
+end note
+@enduml

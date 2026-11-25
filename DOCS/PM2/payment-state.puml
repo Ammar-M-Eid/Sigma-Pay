@@ -1,0 +1,15 @@
+@startuml
+title Payment lifecycle represented by PaymentsServiceBL
+[*] --> Pending
+Pending --> Scheduled : scheduleRecurringPayment
+Pending --> Completed : processPayment
+Scheduled --> Cancelled : cancelPayment
+Completed --> Refunded : refundPayment
+Cancelled --> [*]
+Refunded --> [*]
+note right of Pending
+  Other transitions are rejected by the service.
+  Repeated cancellation, processing, scheduling,
+  or refund attempts do not persist a state change.
+end note
+@enduml

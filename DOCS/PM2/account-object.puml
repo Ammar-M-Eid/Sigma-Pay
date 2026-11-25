@@ -1,0 +1,19 @@
+@startuml
+title Account lookup object snapshot
+object "service:AccountService" as service
+object "accounts:AccountsRepositoryImpl" as accounts
+object "users:UserRepositoryImpl" as users
+object "account:A-204" as account {
+  accountId = A-204
+  userId = U-7
+  balance = 7500 EGP
+}
+object "user:U-7" as user {
+  userId = U-7
+  email = user7@example.test
+}
+service --> accounts : accountsRepository
+service --> users : userRepository
+accounts --> account : stored value
+users --> user : stored value
+@enduml

@@ -1,0 +1,14 @@
+@startuml
+title Notification alert object snapshot
+object "service:NotificationServiceBL" as service
+object "notifications:NotificationRepositoryImpl" as repo
+object "notification:alert" as notification {
+  notificationId = generated UUID
+  userId = U-12
+message = Budget reached 80 percent
+  type = alert
+  read = false
+}
+service --> repo : notificationRepository
+repo --> notification : stored value
+@enduml

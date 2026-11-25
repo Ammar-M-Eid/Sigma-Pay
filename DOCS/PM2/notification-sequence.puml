@@ -1,0 +1,11 @@
+@startuml
+title Record a customer alert
+actor "Budget event" as Event
+participant "NotificationServiceBL" as S
+participant "NotificationRepositoryImpl" as R
+Event -> S : sendAlert("U-12", "Budget reached 80 percent")
+S -> S : create alert notification
+S -> R : save(notification with generated UUID)
+R --> S : notificationId
+S --> Event : true
+@enduml

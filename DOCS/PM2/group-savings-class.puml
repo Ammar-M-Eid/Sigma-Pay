@@ -1,0 +1,54 @@
+@startuml
+title SigmaPay group savings service class diagram mapped to implementation
+skinparam classAttributeIconSize 0
+class GroupSavingsPage <<React UI>>
+class apiClient <<HTTP client>>
+class "Express route /groups" as GroupRoute <<API>>
+class SigmaPayController <<controller>> {
+  ctlCreateGroup(groupName, members)
+  ctlAddMember(groupId, memberId)
+  ctlProcessDeposit(groupId, memberId, amount)
+  ctlGenerateGroupReport(groupId)
+}
+interface IGroupSavingsService {
+  createGroup(group): string
+  joinGroup(groupId, userId): void
+  contribute(groupId, userId, amount): void
+  generateGroupReport(groupId): string
+}
+class GroupSavingsService
+interface IGroupSavingsRepository {
+  save(group): string
+  findById(groupId): IGroupSavings
+}
+class GroupSavingsRepositoryImpl
+interface IGroupSavings {
+  groupId: string
+  groupName: string
+  targetAmount: IMoney
+  currentAmount: IMoney
+  members: string[]
+}
+interface IMoney {
+  amount: number
+  currency: ICurrency
+}
+interface ICurrency {
+  code: string
+  symbol: string
+  exchangeRate: number
+}
+GroupSavingsPage --> apiClient
+apiClient --> GroupRoute
+GroupRoute --> SigmaPayController
+SigmaPayController --> IGroupSavingsService
+GroupSavingsService ..|> IGroupSavingsService
+GroupSavingsService --> IGroupSavingsRepository
+GroupSavingsRepositoryImpl ..|> IGroupSavingsRepository
+GroupSavingsRepositoryImpl o--> IGroupSavings
+IGroupSavings *-- IMoney
+IMoney *-- ICurrency
+note bottom of GroupSavingsRepositoryImpl
+  Process-local map. No database persistence.
+end note
+@enduml

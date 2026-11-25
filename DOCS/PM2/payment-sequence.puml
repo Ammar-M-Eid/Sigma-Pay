@@ -1,0 +1,11 @@
+@startuml
+title Process a pending payment
+actor Customer
+participant "PaymentsServiceBL" as S
+participant "PaymentRepositoryImpl" as R
+Customer -> S : processPayment(P-1)
+S -> S : check state == Pending
+S -> R : save(P-1 with state=Completed)
+R --> S : "P-1"
+S --> Customer : success, paymentId=P-1
+@enduml

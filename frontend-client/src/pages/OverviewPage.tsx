@@ -18,7 +18,7 @@ const OverviewPage: React.FC<OverviewPageProps> = ({ onNavigate }) => (
     <section className="overview-hero" aria-labelledby="welcome-title">
       <div className="overview-copy">
         <span className="overview-kicker"><span className="live-pulse" /> Your local money workspace</span>
-        <h1 id="welcome-title">See the whole picture.<br /><span>Choose your next move.</span></h1>
+        <h1 id="welcome-title" className="heading-1">See the whole picture.<br /><span>Choose your next move.</span></h1>
         <p>Plan what matters, stay on top of everyday spending and make progress toward the things you care about.</p>
         <div className="hero-actions">
           <button className="button-primary" type="button" onClick={() => onNavigate('budgets')}><Wallet size={17} weight="fill" /> Open your budget</button>
@@ -34,7 +34,7 @@ const OverviewPage: React.FC<OverviewPageProps> = ({ onNavigate }) => (
 
     <section className="workspace-section" aria-labelledby="workspace-heading">
       <div className="section-title-row">
-        <div><span className="section-kicker">Start where you are</span><h2 id="workspace-heading">What do you want to work on?</h2></div>
+        <div><span className="section-kicker">Start where you are</span><h2 id="workspace-heading" className="heading-5">What do you want to work on?</h2></div>
         <span className="session-tag"><span className="status-dot" /> Local session</span>
       </div>
       <div className="journey-grid">

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { House, Wallet, Target, UsersThree, Receipt, CreditCard, ChartBar, Bell, UserCircle, Sparkle } from '@phosphor-icons/react';
 
 export type Page = 'overview' | 'budgets' | 'goals' | 'groups' | 'bills' | 'payments' | 'reports' | 'features' | 'notifications' | 'profile' | 'auth';
@@ -22,21 +22,26 @@ const navigation = [
   { key: 'profile' as const, label: 'Profile', icon: UserCircle },
 ];
 
-const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, userId }) => (
-  <header className="app-header">
+const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, userId }) => {
+  const [menuOpen, setMenuOpen] = useState(false);
+  return <header className="app-header">
     <a className="brand" href="#/overview" onClick={() => onNavigate('overview')} aria-label="SigmaPay overview">
       <span className="brand-mark" aria-hidden="true"><span /></span>
       <span className="brand-name">sigma<span>pay</span></span>
     </a>
 
-    <nav className="side-nav" aria-label="Main navigation">
+    <button className={`menu-toggle ${menuOpen ? 'is-open' : ''}`} type="button" aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen} aria-controls="main-navigation" onClick={() => setMenuOpen(!menuOpen)}>
+      <span /><span /><span />
+    </button>
+
+    <nav id="main-navigation" className={`side-nav ${menuOpen ? 'is-open' : ''}`} aria-label="Main navigation">
       {navigation.map(({ key, label, icon: Icon }) => (
         <a
           className={`nav-link ${currentPage === key ? 'is-active' : ''}`}
           href={`#/${key}`}
           key={key}
           aria-current={currentPage === key ? 'page' : undefined}
-          onClick={() => onNavigate(key)}
+          onClick={() => { setMenuOpen(false); onNavigate(key); }}
         >
           <Icon className="nav-icon" size={17} weight={currentPage === key ? 'fill' : 'regular'} aria-hidden="true" />
           <span>{label}</span>
@@ -49,7 +54,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, userId }) => (
       <span className="account-label"><strong>{userId ? 'Demo account' : 'Sign in'}</strong></span>
       <span className="account-arrow" aria-hidden="true">⌄</span>
     </button>
-  </header>
-);
+  </header>;
+};
 
 export default Header;

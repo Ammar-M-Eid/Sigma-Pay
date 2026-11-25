@@ -21,7 +21,25 @@ const investments = [
   { id: 'government-bonds', name: 'Government bonds', category: 'Fixed income', risk: 'Prices and income can vary with rates, issuer, and term.', availability: 'Illustrative information only' },
 ];
 
-const strategies = new Map<string, { userId: string; optionIds: string[]; updatedAt: string }>();
+export type InvestmentStrategy = { userId: string; optionIds: string[]; updatedAt: string };
+
+export interface InvestmentStrategyStore {
+  get(userId: string): InvestmentStrategy | null;
+  save(strategy: InvestmentStrategy): void;
+}
+
+export class InMemoryInvestmentStrategyStore implements InvestmentStrategyStore {
+  private strategies = new Map<string, InvestmentStrategy>();
+
+  get(userId: string): InvestmentStrategy | null {
+    return this.strategies.get(userId) ?? null;
+  }
+
+  save(strategy: InvestmentStrategy): void {
+    this.strategies.set(strategy.userId, strategy);
+  }
+}
+
 const quizAttempts = new Map<string, Array<{ attemptId: string; score: number; total: number; completedAt: string }>>();
 const consultations = new Map<string, Array<{ requestId: string; topic: string; status: 'Provider unavailable'; requestedAt: string }>>();
 
@@ -29,14 +47,14 @@ function isText(value: unknown, maxLength = 240): value is string {
   return typeof value === 'string' && value.trim().length > 0 && value.trim().length <= maxLength;
 }
 
-export function createFeatureHubRouter(): Router {
+export function createFeatureHubRouter(strategyStore: InvestmentStrategyStore = new InMemoryInvestmentStrategyStore()): Router {
   const router = Router();
 
   router.get('/investments/options', (_req, res) => {
     res.json({ success: true, source: 'illustrative-demo', connected: false, options: investments });
   });
   router.get('/investments/:userId/strategy', (req, res) => {
-    const strategy = strategies.get(req.params.userId);
+    const strategy = strategyStore.get(req.params.userId);
     res.json({ success: true, strategy: strategy ?? null, persistence: 'process-memory' });
   });
   router.put('/investments/:userId/strategy', (req, res) => {
@@ -46,7 +64,7 @@ export function createFeatureHubRouter(): Router {
       return;
     }
     const strategy = { userId: req.params.userId, optionIds: [...new Set(optionIds as string[])], updatedAt: new Date().toISOString() };
-    strategies.set(req.params.userId, strategy);
+    strategyStore.save(strategy);
     res.json({ success: true, strategy, source: 'illustrative-demo' });
   });
 

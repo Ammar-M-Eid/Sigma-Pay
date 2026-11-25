@@ -60,8 +60,8 @@ export interface IGroupSavingsService {
 
 export interface IPaymentsServiceBL {
   processPayment(payment: IPayment): any;
-  scheduleRecurringPayment(payment: IPayment, schedule: any): string;
-  cancelPayment(paymentId: string): void;
+  scheduleRecurringPayment(payment: IPayment, schedule: any): string | null;
+  cancelPayment(paymentId: string): boolean;
   refundPayment(paymentId: string): any;
   getPaymentsByUserId(userId: string): IPayment[];
 }

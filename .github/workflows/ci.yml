@@ -22,16 +22,52 @@ jobs:
             frontend-client/package-lock.json
       - name: Build backend
         working-directory: backend-server
-        run: npm ci && npm run build
+        run: npm ci && npm test
+      - name: Upload backend coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend-server/coverage/lcov.info
       - name: Build frontend
         working-directory: frontend-client
         run: npm ci && npm run build
       - name: Build container images
         run: docker compose build
 
-  publish:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  sonarqube:
+    if: ${{ vars.SONAR_HOST_URL != '' }}
     needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend-server/package-lock.json
+      - name: Generate coverage
+        working-directory: backend-server
+        run: npm ci && npm test
+      - name: SonarQube scan
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Enforce quality gate
+        uses: SonarSource/sonarqube-quality-gate-action@v1
+        timeout-minutes: 5
+        env:
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  publish:
+    if: >-
+      always() && github.event_name == 'push' && github.ref == 'refs/heads/main' &&
+      needs.validate.result == 'success' &&
+      (vars.SONAR_HOST_URL == '' || needs.sonarqube.result == 'success')
+    needs: [validate, sonarqube]
     runs-on: ubuntu-latest
     permissions:
       contents: read

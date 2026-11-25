@@ -1,0 +1,16 @@
+@startuml
+title Notification alert communication
+object "event:BudgetEvent" as E
+object "service:NotificationServiceBL" as S
+object "repository:NotificationRepositoryImpl" as R
+object "notification:alert" as N
+E -> S : 1: sendAlert("U-12", "Budget reached 80 percent")
+S -> N : 1.1: create alert with generated UUID and unread status
+S -> R : 1.2: save(notification)
+R --> S : 1.3: notificationId
+S --> E : 2: true
+note bottom
+Class links are in system-service-classes.puml.
+notification-scenario.test.cjs checks saved values and repository calls.
+end note
+@enduml

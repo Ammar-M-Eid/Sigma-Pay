@@ -1,0 +1,13 @@
+@startuml
+title Payment processing object snapshot
+object "service:PaymentsServiceBL" as service
+object "payments:PaymentRepositoryImpl" as payments
+object "payment:P-1" as payment {
+  paymentId = P-1
+  userId = U-7
+  amount = 500 EGP
+  state = Pending
+}
+service --> payments : paymentRepository
+payments --> payment : stored value
+@enduml

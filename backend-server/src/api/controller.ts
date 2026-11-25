@@ -438,7 +438,7 @@ export class Controller {
     const payment: IPayment = {
       paymentId: uuidv4(), userId,
       amount: { amount, currency: { code: 'USD', symbol: '$', exchangeRate: 1 } },
-      methodId, merchantId, state: 'Scheduled', timestamp: new Date().toISOString(),
+      methodId, merchantId, state: 'Pending', timestamp: new Date().toISOString(),
     };
     const paymentId = this.paymentsService.scheduleRecurringPayment(payment, { frequency, nextRunAt });
     return this.paymentsService.getPaymentsByUserId(userId).find((item) => item.paymentId === paymentId) ?? null;
