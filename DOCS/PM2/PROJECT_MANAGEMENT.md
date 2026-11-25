@@ -67,3 +67,5 @@ These are implementation gaps identified in the local code, not yet Jira stories
 [SigmaPay SCRUM board backlog](https://aiu-team-jkoscu8b.atlassian.net/jira/software/projects/SCRUM/boards/1/backlog). The checked in workbook is an editable snapshot, not a live Jira export. Update the Jira board with any newly estimated stories and preserve the same sprint assignment, points, and status in the workbook.
 
 The connected Jira project now contains [SCRUM-47](https://aiu-team-jkoscu8b.atlassian.net/browse/SCRUM-47), an unestimated backlog task tracking M2 artifacts and outstanding team/service evidence. It is intentionally not assigned to Sprint 1. Jira keeps Sprint 0 Active despite its ended dates and Sprint 1 Future with proposal scope. Do not change Sprint 0 history. Sprint 1 dates remain unset pending team capacity and schedule agreement.
+
+PR [#9](https://github.com/Ammar-M-Eid/Sigma-Pay/pull/9) contains the M2 source and documentation. Its hosted validation run [45649665792](https://github.com/Ammar-M-Eid/Sigma-Pay/actions/runs/45649665792) passed on commit 78c7f86; SonarQube was skipped because its server variable is not configured.

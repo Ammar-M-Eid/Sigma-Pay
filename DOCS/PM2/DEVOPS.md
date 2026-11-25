@@ -25,3 +25,7 @@ The team accepts TypeScript unit tests and does not want JUnit. Tests in `backen
 4. Verify a pull request run fails when the quality gate fails.
 
 Until the server and credentials exist, no passing SonarQube quality gate can be claimed. GitHub Actions skips the SonarQube job unless `SONAR_HOST_URL` is configured, then requires `SONAR_TOKEN` and enforces the returned gate. Jenkins waits for its SonarQube webhook. The Jenkinsfile uses Windows `bat` steps and therefore needs a Windows agent; change its shell steps if the team uses Linux agents.
+
+## Hosted pull-request validation
+
+PR [#9](https://github.com/Ammar-M-Eid/Sigma-Pay/pull/9) includes the M2 implementation. GitHub Actions run [45649665792](https://github.com/Ammar-M-Eid/Sigma-Pay/actions/runs/45649665792) passed its validation job for commit 78c7f86 on 2026-11-25. The SonarQube job was skipped because SONAR_HOST_URL is not configured; the image publishing job was skipped because this was a pull request. Configure the SonarQube URL and token to produce hosted quality-gate evidence.
