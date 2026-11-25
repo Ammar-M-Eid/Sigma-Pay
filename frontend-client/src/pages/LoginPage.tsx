@@ -76,8 +76,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onSwitchToRegiste
 
         <form onSubmit={handleLogin} style={styles.form}>
           <div style={styles.formGroup}>
-            <label style={styles.label}>Email Address</label>
+            <label htmlFor="login-email" style={styles.label}>Email Address</label>
             <input
+              id="login-email"
               type="email"
               value={email}
               onChange={(e) => {
@@ -94,8 +95,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onSwitchToRegiste
           </div>
 
           <div style={styles.formGroup}>
-            <label style={styles.label}>Two-step code <span style={{ fontWeight: 400, color: '#87949b' }}>(if enabled)</span></label>
+            <label htmlFor="login-verification-code" style={styles.label}>Two-step code <span style={{ fontWeight: 400, color: '#87949b' }}>(if enabled)</span></label>
             <input
+              id="login-verification-code"
               type="text"
               inputMode="numeric"
               autoComplete="one-time-code"
@@ -107,8 +109,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onSwitchToRegiste
           </div>
 
           <div style={styles.formGroup}>
-            <label style={styles.label}>Password</label>
+            <label htmlFor="login-password" style={styles.label}>Password</label>
             <input
+              id="login-password"
               type="password"
               value={password}
               onChange={(e) => {
