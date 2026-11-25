@@ -49,7 +49,7 @@ jobs:
           cache-dependency-path: backend-server/package-lock.json
       - name: Generate coverage
         working-directory: backend-server
-        run: npm ci && npm test
+        run: npm ci --ignore-scripts && npm test
       - name: SonarQube scan
         uses: SonarSource/sonarqube-scan-action@70bad232163b09d998ea0707ee80c0ec80798c16 # v8.5.1
         env:
