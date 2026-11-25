@@ -1,8 +1,10 @@
 import express, { Application, NextFunction, Request, Response } from 'express';
+import { randomBytes } from 'crypto';
 import cors from 'cors';
 import { Controller, createApiRouter } from './api/controller';
 import { createFeatureHubRouter } from './api/featureHub';
 import { IUserAccount } from './domain/entities';
+import { hashPassword } from './config/passwords';
 import {
   AccountService,
   BudgetService,
@@ -78,7 +80,7 @@ function initializeApp(): Application {
   if (SERVICE_DOMAIN === 'identity' || SERVICE_DOMAIN === 'all') {
     const demoUser: IUserAccount = {
       userId: 'demo-user',
-      credentials: { username: 'demo', passwordHash: 'demo-login-only' },
+      credentials: { username: 'demo', passwordHash: hashPassword(randomBytes(32).toString('hex')) },
       profile: { email: 'demo@example.invalid', phone: '201000000000', address: 'Local demo profile' },
       securitySettings: { twoFactorEnabled: false, accountStatus: 'Active' },
     };

@@ -16,7 +16,7 @@ The proposal is the scope baseline. It describes the running app as a mock proto
 | Payment object, sequence, communication and state diagrams | `payment-*.puml`; `PaymentsServiceBL` and `IPaymentRepository` | `backend-server/test/payment-state.test.cjs` checks valid and invalid transitions plus repository calls |
 | Goal state diagram | `goal-state.puml`; `GoalService.contributeToGoal` | `goal-scenario.test.cjs` verifies Active to Completed at the target amount |
 | CI coverage | `.github/workflows/ci.yml`; `backend-server/package.json` | TypeScript service tests run via Node test and `c8`; latest local result is recorded in the delivery summary, not as a hosted Actions result |
-| GitHub Actions | `.github/workflows/ci.yml` | `npm test` builds and runs 12 Node tests with `c8`; frontend build and Docker image builds remain in validation |
+| GitHub Actions | `.github/workflows/ci.yml` | `npm test` builds and runs 13 Node tests with `c8`; frontend build and Docker image builds remain in validation |
 | SonarQube | `sonar-project.properties`, CI SonarQube job | Configure repository secret `SONAR_TOKEN` and variable `SONAR_HOST_URL`; quality gate runs after scan |
 | Jenkins | Root `Jenkinsfile` | Configure Jenkins NodeJS tool `Node 22`, SonarQube installation `SigmaPay SonarQube`, and scanner on PATH |
 | Sprint plan and burndown | `A:\CS Study\7th Sem\Advanced\SigmaPay_SprintPlan_and_Burndown.xlsx` | Jira board: [SCRUM backlog](https://aiu-team-jkoscu8b.atlassian.net/jira/software/projects/SCRUM/boards/1/backlog) |

@@ -156,10 +156,15 @@ class ApiClient {
   }
 
   async exportReport(userId: string, type: 'monthly' | 'income' | 'spending', startDate?: string, endDate?: string) {
+    if (!/^[A-Za-z0-9_-]{1,128}$/.test(userId)) {
+      throw new Error('The account identifier is invalid.');
+    }
     const params = new URLSearchParams({ type });
     if (startDate) params.set('startDate', startDate);
     if (endDate) params.set('endDate', endDate);
-    return fetch(`${this.baseUrl}/reports/${encodeURIComponent(userId)}/export?${params.toString()}`);
+    const exportUrl = new URL(`${this.baseUrl}/reports/${userId}/export`);
+    params.forEach((value, key) => exportUrl.searchParams.set(key, value));
+    return fetch(exportUrl.toString());
   }
 
   // Payments API

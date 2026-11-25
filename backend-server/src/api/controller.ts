@@ -23,6 +23,15 @@ import {
   IBill,
 } from '../domain/entities';
 
+function isValidEmailAddress(email: string): boolean {
+  const parts = email.split('@');
+  if (parts.length !== 2) return false;
+  const [local, domain] = parts;
+  if (!local || !domain || /\s/.test(email)) return false;
+  const labels = domain.split('.');
+  return labels.length >= 2 && labels.every((label) => label.length > 0 && !label.startsWith('-') && !label.endsWith('-'));
+}
+
 // Controller class implementing all controller interfaces from UML
 export class Controller {
   private notificationPreferences = new Map<string, Record<string, boolean>>();
@@ -47,7 +56,7 @@ export class Controller {
       normalizedUsername.length < 3 ||
       normalizedUsername.length > 20 ||
       !/^[a-z0-9_]+$/.test(normalizedUsername) ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail) ||
+      !isValidEmailAddress(normalizedEmail) ||
       !/^\d{10,}$/.test(phone.replace(/\D/g, '')) ||
       !isValidPassword(password)
     ) {
@@ -138,7 +147,7 @@ export class Controller {
     try {
       const user = this.accountService.getUserAccount(userId);
       const email = newEmail.trim().toLowerCase(); const phone = newPhoneNumber.trim();
-      if (!user || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !/^\d{10,}$/.test(phone.replace(/\D/g, ''))) return false;
+      if (!user || !isValidEmailAddress(email) || !/^\d{10,}$/.test(phone.replace(/\D/g, ''))) return false;
       const duplicateEmail = this.accountService.findUserByEmail(email);
       const duplicatePhone = this.accountService.findUserByPhone(phone);
       if ((duplicateEmail && duplicateEmail.userId !== userId) || (duplicatePhone && duplicatePhone.userId !== userId)) return false;
