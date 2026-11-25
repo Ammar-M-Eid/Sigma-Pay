@@ -51,7 +51,7 @@ const OverviewPage: React.FC<OverviewPageProps> = ({ onNavigate }) => (
     <section className="tools-section" aria-labelledby="tools-heading">
       <div className="section-title-row">
         <div><span className="section-kicker">Your financial toolkit</span><h2 id="tools-heading">One place for the details</h2></div>
-        <button className="text-link" type="button" onClick={() => onNavigate('payments')}>View all tools <ArrowUpRight size={16} /></button>
+        <button className="text-link" type="button" onClick={() => onNavigate('features')}>View all tools <ArrowUpRight size={16} /></button>
       </div>
       <div className="tool-rail">
         <button type="button" onClick={() => onNavigate('payments')}><span className="rail-icon rail-blue"><CreditCard size={19} /></span><span><b>Payments</b><small>Simulated checkout</small></span><ArrowUpRight size={16} /></button>

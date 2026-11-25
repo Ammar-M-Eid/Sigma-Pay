@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import Header, { Page } from './components/Header';
-import FinanceVector, { IllustrationKind } from './components/FinanceVector';
 import OverviewPage from './pages/OverviewPage';
 import AuthPage from './pages/AuthPage';
 import BudgetPage from './pages/BudgetPage';
@@ -14,17 +13,10 @@ import BillsPage from './pages/BillsPage';
 import FeatureHubPage from './pages/FeatureHubPage';
 
 const pageSet: Page[] = ['overview', 'budgets', 'goals', 'groups', 'bills', 'payments', 'reports', 'features', 'notifications', 'profile', 'auth'];
-const pageIllustrations: Record<Exclude<Page, 'auth'>, { kind: IllustrationKind; title: string; description: string }> = {
-  overview: { kind: 'overview', title: 'Your money, in focus.', description: 'A clear place to plan, make progress and understand the choices ahead.' },
-  budgets: { kind: 'budgets', title: 'Give every plan a number.', description: 'Create a spending plan, then record expenses against its categories.' },
-  goals: { kind: 'goals', title: 'Make progress visible.', description: 'Set a target and deadline, then follow the amount still to go.' },
-  groups: { kind: 'groups', title: 'Build toward something together.', description: 'Create a savings circle, invite members and record contributions.' },
-  bills: { kind: 'bills', title: 'Keep bills on schedule.', description: 'Add bills, review due dates and schedule recurring payments in the sandbox.' },
-  payments: { kind: 'payments', title: 'Payments in a safe sandbox.', description: 'Explore the payment flow with simulated methods and no real money.' },
-  reports: { kind: 'reports', title: 'See the story in your activity.', description: 'Review income and spending summaries based on recorded demo data.' },
-  features: { kind: 'reports', title: 'Explore your financial toolkit.', description: 'Learn, review illustrative information, and see which services are available.' },
-  notifications: { kind: 'notifications', title: 'Choose what deserves your attention.', description: 'Manage local preferences and view alerts generated in this session.' },
-  profile: { kind: 'profile', title: 'Your account, your settings.', description: 'Review profile details and demo account security controls.' },
+const pageTitles: Partial<Record<Page, string>> = {
+  overview: 'Overview', budgets: 'Budgets', goals: 'Savings goals', groups: 'Group savings',
+  bills: 'Bills', payments: 'Payments', reports: 'Reports', features: 'Explore',
+  notifications: 'Notifications', profile: 'Profile', auth: 'Account access',
 };
 
 function readPage(): Page {
@@ -42,43 +34,10 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const root = document.documentElement;
-    const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let pointerFrame = 0;
-    let scrollFrame = 0;
-    let pointerX = -1000;
-    let pointerY = -1000;
-
-    const drawPointer = () => {
-      root.style.setProperty('--cursor-x', `${pointerX}px`);
-      root.style.setProperty('--cursor-y', `${pointerY}px`);
-      pointerFrame = 0;
-    };
-    const onPointerMove = (event: PointerEvent) => {
-      pointerX = event.clientX;
-      pointerY = event.clientY;
-      if (!pointerFrame) pointerFrame = window.requestAnimationFrame(drawPointer);
-    };
-    const updateScrollProgress = () => {
-      const maxScroll = Math.max(0, root.scrollHeight - window.innerHeight);
-      const progress = maxScroll ? Math.min(1, Math.max(0, window.scrollY / maxScroll)) : 0;
-      root.style.setProperty('--scroll-progress', `${progress}`);
-      root.style.setProperty('--hero-shift', reducedMotion.matches ? '0px' : `${Math.min(34, window.scrollY * 0.045)}px`);
-      scrollFrame = 0;
-    };
-    const onScroll = () => {
-      if (!scrollFrame) scrollFrame = window.requestAnimationFrame(updateScrollProgress);
-    };
-
-    if (finePointer.matches && !reducedMotion.matches) window.addEventListener('pointermove', onPointerMove, { passive: true });
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
-    updateScrollProgress();
-
     const motionRoot = document.querySelector<HTMLElement>('#main-content');
     const revealTargets = motionRoot?.querySelectorAll<HTMLElement>(
-      '.overview-page > section, .overview-page > .demo-disclosure, .module-page > .module-intro, .workflow-page > .module-heading, .workflow-page > .budget-overview, .workflow-page > .workflow-grid, .workflow-page > .report-options',
+      '.overview-page > section, .overview-page > .demo-disclosure, .workflow-page > .module-heading, .workflow-page > .budget-overview, .workflow-page > .workflow-grid, .workflow-page > .workflow-panel, .workflow-page > .report-options, .feature-hub-heading, .feature-content',
     );
     let observer: IntersectionObserver | null = null;
     if (!reducedMotion.matches && revealTargets?.length && 'IntersectionObserver' in window) {
@@ -96,14 +55,7 @@ const App: React.FC = () => {
       else target.classList.add('is-visible');
     });
 
-    return () => {
-      observer?.disconnect();
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-      if (pointerFrame) window.cancelAnimationFrame(pointerFrame);
-      if (scrollFrame) window.cancelAnimationFrame(scrollFrame);
-    };
+    return () => observer?.disconnect();
   }, [currentPage]);
 
   const navigate = (page: Page) => {
@@ -127,14 +79,6 @@ const App: React.FC = () => {
     <div className="auth-stage"><AuthPage onLoginSuccess={loginSuccess} /></div>
   ) : userId ? (
     currentPage === 'features' ? <FeatureHubPage userId={userId} /> : <div className={`module-page module-${currentPage}`}>
-      <section className="module-intro">
-        <div className="module-intro-copy">
-          <span className="section-kicker">SigmaPay · {currentPage === 'groups' ? 'Group savings' : currentPage.charAt(0).toUpperCase() + currentPage.slice(1)}</span>
-          <h1 className="heading-3">{pageIllustrations[currentPage].title}</h1>
-          <p>{pageIllustrations[currentPage].description}</p>
-        </div>
-        <FinanceVector kind={pageIllustrations[currentPage].kind} title={`${currentPage} illustration`} />
-      </section>
       {currentPage === 'budgets' && <BudgetPage userId={userId} />}
       {currentPage === 'goals' && <GoalsPage userId={userId} />}
       {currentPage === 'reports' && <ReportsPage userId={userId} />}
@@ -156,7 +100,7 @@ const App: React.FC = () => {
       <Header currentPage={currentPage} onNavigate={navigate} userId={userId} />
       <div className="main-column">
         <header className="topbar">
-          <div className="breadcrumb"><span>PERSONAL FINANCE</span><span aria-hidden="true">/</span><strong>{currentPage === 'auth' ? 'Account access' : currentPage === 'overview' ? 'Overview' : pageIllustrations[currentPage].title.replace(/[.]/g, '')}</strong></div>
+          <div className="breadcrumb"><span>Workspace</span><span aria-hidden="true">/</span><strong>{pageTitles[currentPage]}</strong></div>
           <div className="topbar-meta"><span className="local-demo-chip"><span className="demo-chip-icon">D</span> Local demo</span></div>
         </header>
         <main id="main-content" className="main-content page-transition" key={currentPage}>

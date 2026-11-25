@@ -9,18 +9,27 @@ interface HeaderProps {
   userId: string | null;
 }
 
-const navigation = [
-  { key: 'overview' as const, label: 'Overview', icon: House },
-  { key: 'budgets' as const, label: 'Budgets', icon: Wallet },
-  { key: 'goals' as const, label: 'Goals', icon: Target },
-  { key: 'groups' as const, label: 'Group savings', icon: UsersThree },
-  { key: 'bills' as const, label: 'Bills', icon: Receipt },
-  { key: 'payments' as const, label: 'Payments', icon: CreditCard },
-  { key: 'reports' as const, label: 'Reports', icon: ChartBar },
-  { key: 'features' as const, label: 'Explore', icon: Sparkle },
-  { key: 'notifications' as const, label: 'Notifications', icon: Bell },
-  { key: 'profile' as const, label: 'Profile', icon: UserCircle },
+const navigationGroups = [
+  { label: 'Workspace', items: [
+    { key: 'overview' as const, label: 'Overview', icon: House },
+  ] },
+  { label: 'Plan your money', items: [
+    { key: 'budgets' as const, label: 'Budgets', icon: Wallet },
+    { key: 'goals' as const, label: 'Goals', icon: Target },
+    { key: 'groups' as const, label: 'Group savings', icon: UsersThree },
+    { key: 'bills' as const, label: 'Bills', icon: Receipt },
+    { key: 'payments' as const, label: 'Payments', icon: CreditCard },
+  ] },
+  { label: 'Understand and learn', items: [
+    { key: 'reports' as const, label: 'Reports', icon: ChartBar },
+    { key: 'features' as const, label: 'Explore', icon: Sparkle },
+    { key: 'notifications' as const, label: 'Notifications', icon: Bell },
+  ] },
+  { label: 'Account', items: [
+    { key: 'profile' as const, label: 'Profile', icon: UserCircle },
+  ] },
 ];
+const navigationOrder = navigationGroups.flatMap((group) => group.items.map((item) => item.key));
 
 const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, userId }) => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -34,19 +43,22 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, userId }) => {
       <span /><span /><span />
     </button>
 
-    <nav id="main-navigation" className={`side-nav ${menuOpen ? 'is-open' : ''}`} aria-label="Main navigation">
-      {navigation.map(({ key, label, icon: Icon }) => (
-        <a
-          className={`nav-link ${currentPage === key ? 'is-active' : ''}`}
-          href={`#/${key}`}
-          key={key}
-          aria-current={currentPage === key ? 'page' : undefined}
-          onClick={() => { setMenuOpen(false); onNavigate(key); }}
-        >
-          <Icon className="nav-icon" size={17} weight={currentPage === key ? 'fill' : 'regular'} aria-hidden="true" />
-          <span>{label}</span>
-        </a>
-      ))}
+    <nav id="main-navigation" className={`side-nav ${menuOpen ? 'is-open' : ''}`} aria-label="Main navigation" aria-hidden={!menuOpen && window.matchMedia('(max-width: 820px)').matches}>
+      {navigationGroups.map((group) => <div className="nav-group" key={group.label}>
+        <span className="nav-group-label">{group.label}</span>
+        {group.items.map(({ key, label, icon: Icon }) => (
+          <a
+            className={`nav-link nav-link-order-${navigationOrder.indexOf(key)} ${currentPage === key ? 'is-active' : ''}`}
+            href={`#/${key}`}
+            key={key}
+            aria-current={currentPage === key ? 'page' : undefined}
+            onClick={() => { setMenuOpen(false); onNavigate(key); }}
+          >
+            <Icon className="nav-icon" size={18} weight={currentPage === key ? 'fill' : 'regular'} aria-hidden="true" />
+            <span>{label}</span>
+          </a>
+        ))}
+      </div>)}
     </nav>
 
     <button className="account-switch" type="button" onClick={() => onNavigate(userId ? 'auth' : 'overview')}>
