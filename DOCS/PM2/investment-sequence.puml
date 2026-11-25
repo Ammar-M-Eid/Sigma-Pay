@@ -1,0 +1,16 @@
+@startuml
+title Save an illustrative investment strategy
+actor Customer
+participant "FeatureHubRouter" as R
+participant "InvestmentStrategyStore" as M
+Customer -> R : PUT /investments/U-88/strategy
+R -> R : validate optionIds against sample catalogue
+R -> M : set("U-88", strategy)
+M --> R : strategy stored
+R --> Customer : success, illustrative-demo
+Customer -> R : GET /investments/U-88/strategy
+R -> M : get("U-88")
+M --> R : saved strategy
+R --> Customer : strategy, process-memory
+@enduml
+

@@ -1,0 +1,17 @@
+@startuml
+title Record expense object snapshot
+object "service:BudgetService" as service
+object "budgets:BudgetRepositoryImpl" as budgets
+object "transactions:TransactionRepositoryImpl" as transactions
+object "budget:B-11" as budget {
+  budgetId = B-11
+  userId = U-7
+  total = 3000 EGP
+  spent = 1200
+  categories = Food
+}
+service --> budgets : budgetRepository
+service --> transactions : transactionRepository
+budgets --> budget : stored value
+@enduml
+

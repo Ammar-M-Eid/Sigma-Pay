@@ -1,0 +1,208 @@
+@startuml
+title SigmaPay implemented service class model
+skinparam classAttributeIconSize 0
+interface IAccountsRepository {
+  save(account): string
+  findById(id): IAccount
+}
+interface IUserRepository {
+  save(user): string
+  findByEmail(email): IUserAccount
+}
+interface IBudgetRepository {
+  save(plan): string
+  findById(id): IBudgetPlan
+  findByUserId(id): IBudgetPlan[]
+}
+interface ITransactionRepository {
+  save(tx): string
+  findByUserId(id): ITransaction[]
+}
+interface IGoalRepository {
+  save(goal): string
+  findById(id): IFinancialGoal
+}
+interface IGroupSavingsRepository {
+  save(group): string
+  findById(id): IGroupSavings
+}
+interface IPaymentRepository {
+  save(payment): string
+  findById(id): IPayment
+}
+interface INotificationRepository {
+  save(notification): string
+  findByUserId(userId): INotification[]
+}
+class AccountService {
+  getAccount(accountId): IAccount
+  createAccount(account): string
+}
+class BudgetService {
+  recordExpense(userId, amount, category): boolean
+  createBudget(plan): string
+}
+class GoalService {
+  contributeToGoal(goalId, amount): void
+  trackProgress(goalId): IGoalProgress
+}
+class GroupSavingsService {
+  contribute(groupId, userId, amount): void
+  joinGroup(groupId, userId): void
+}
+class PaymentsServiceBL {
+  processPayment(payment): result
+  scheduleRecurringPayment(payment, schedule): string
+  cancelPayment(paymentId): boolean
+  refundPayment(paymentId): result
+}
+class NotificationServiceBL {
+  sendAlert(userId, message): boolean
+  getNotifications(userId): INotification[]
+}
+class FeatureHubRouter <<Express router>> {
+  saveStrategy(userId, optionIds): response
+  getStrategy(userId): response
+}
+interface InvestmentStrategyStore {
+  get(userId): InvestmentStrategy
+  save(strategy): void
+}
+class InMemoryInvestmentStrategyStore
+class AccountsRepositoryImpl
+class UserRepositoryImpl
+class BudgetRepositoryImpl
+class TransactionRepositoryImpl
+class GoalRepositoryImpl
+class GroupSavingsRepositoryImpl
+class PaymentRepositoryImpl
+class NotificationRepositoryImpl
+interface IAccount {
+  accountId: string
+  userId: string
+  balance: IMoney
+}
+interface IUserAccount {
+  userId: string
+  credentials: ICredentials
+  profile: IUserProfile
+  securitySettings: ISecuritySettings
+}
+interface ICredentials {
+  username: string
+  passwordHash: string
+}
+interface IUserProfile {
+  email: string
+  phone: string
+  address: string
+}
+interface ISecuritySettings {
+  twoFactorEnabled: boolean
+  accountStatus: string
+}
+interface IMoney {
+  amount: number
+  currency: ICurrency
+}
+interface ICurrency {
+  code: string
+  symbol: string
+  exchangeRate: number
+}
+interface IGoalProgress {
+  percentageComplete: number
+  remainingAmount: IMoney
+  daysRemaining: number
+  onTrack: boolean
+}
+interface IBudgetPlan {
+  budgetId: string
+  spent: number
+  categories: string[]
+}
+interface ITransaction {
+  transactionId: string
+  category: string
+  amount: IMoney
+}
+interface IFinancialGoal {
+  goalId: string
+  state: string
+  targetAmount: IMoney
+  currentAmount: IMoney
+}
+interface IGroupSavings {
+  groupId: string
+  members: string[]
+  currentAmount: IMoney
+}
+interface IPayment {
+  paymentId: string
+  state: string
+  amount: IMoney
+}
+interface INotification {
+  notificationId: string
+  userId: string
+  message: string
+  read: boolean
+}
+class InvestmentOption {
+  id: string
+  name: string
+  category: string
+  risk: string
+}
+class InvestmentStrategy {
+  userId: string
+  optionIds: string[]
+  updatedAt: string
+}
+IAccount *-- IMoney
+IUserAccount *-- ICredentials
+IUserAccount *-- IUserProfile
+IUserAccount *-- ISecuritySettings
+IBudgetPlan *-- IMoney
+ITransaction *-- IMoney
+IFinancialGoal *-- IMoney
+IGroupSavings *-- IMoney
+IPayment *-- IMoney
+IMoney *-- ICurrency
+AccountService --> IAccountsRepository
+AccountService --> IUserRepository
+AccountsRepositoryImpl ..|> IAccountsRepository
+UserRepositoryImpl ..|> IUserRepository
+BudgetService --> IBudgetRepository
+BudgetService --> ITransactionRepository
+BudgetRepositoryImpl ..|> IBudgetRepository
+TransactionRepositoryImpl ..|> ITransactionRepository
+GoalService --> IGoalRepository
+GoalService ..> IFinancialGoal
+GoalRepositoryImpl ..|> IGoalRepository
+GroupSavingsService --> IGroupSavingsRepository
+GroupSavingsRepositoryImpl ..|> IGroupSavingsRepository
+PaymentsServiceBL --> IPaymentRepository
+PaymentsServiceBL ..> IPayment
+PaymentRepositoryImpl ..|> IPaymentRepository
+NotificationServiceBL --> INotificationRepository
+NotificationServiceBL ..> INotification
+NotificationRepositoryImpl ..|> INotificationRepository
+FeatureHubRouter --> InvestmentStrategyStore
+InMemoryInvestmentStrategyStore ..|> InvestmentStrategyStore
+InMemoryInvestmentStrategyStore *-- InvestmentStrategy
+FeatureHubRouter ..> InvestmentOption
+InvestmentStrategyStore ..> InvestmentStrategy
+IAccountsRepository ..> IAccount
+IBudgetRepository ..> IBudgetPlan
+ITransactionRepository ..> ITransaction
+IGoalRepository ..> IFinancialGoal
+IGroupSavingsRepository ..> IGroupSavings
+IPaymentRepository ..> IPayment
+INotificationRepository ..> INotification
+note bottom
+Implementations are under backend-server/src/domain, src/services and src/data.
+Repositories are in-memory prototype adapters; data is not persistent.
+end note
+@enduml
+

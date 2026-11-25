@@ -10,7 +10,6 @@ create table if not exists public."User" (
   address text not null default '',
   enabled boolean not null default true,
   "twoFAEnabled" boolean not null default false,
-  "passwordHash" text,
   "createdAt" timestamptz not null default now(),
   "updatedAt" timestamptz not null default now()
 );
@@ -134,3 +133,66 @@ create index if not exists transaction_user_idx on public."Transaction" ("userId
 create index if not exists notification_user_idx on public."Notification" ("userId", at desc);
 create index if not exists budget_user_idx on public."Budget" ("userId");
 create index if not exists goal_user_idx on public."Goal" ("userId");
+
+-- Credentials belong to Supabase Auth, never to the application profile table.
+-- Enforce row ownership for browser clients using the publishable key. The backend
+-- service key remains server-only and bypasses RLS by design.
+alter table public."User" enable row level security;
+alter table public."LoginActivity" enable row level security;
+alter table public."Budget" enable row level security;
+alter table public."Transaction" enable row level security;
+alter table public."Goal" enable row level security;
+alter table public."PaymentTransaction" enable row level security;
+alter table public."SavingsGroup" enable row level security;
+alter table public."GroupContribution" enable row level security;
+alter table public."Notification" enable row level security;
+alter table public."NotificationPreference" enable row level security;
+alter table public."Bill" enable row level security;
+
+drop policy if exists user_owns_profile on public."User";
+create policy user_owns_profile on public."User" for all to authenticated
+  using (id = auth.uid()) with check (id = auth.uid());
+drop policy if exists user_owns_login_activity on public."LoginActivity";
+create policy user_owns_login_activity on public."LoginActivity" for all to authenticated
+  using ("userId" = auth.uid()) with check ("userId" = auth.uid());
+drop policy if exists user_owns_budgets on public."Budget";
+create policy user_owns_budgets on public."Budget" for all to authenticated
+  using ("userId" = auth.uid()) with check ("userId" = auth.uid());
+drop policy if exists user_owns_transactions on public."Transaction";
+create policy user_owns_transactions on public."Transaction" for all to authenticated
+  using ("userId" = auth.uid()) with check ("userId" = auth.uid());
+drop policy if exists user_owns_goals on public."Goal";
+create policy user_owns_goals on public."Goal" for all to authenticated
+  using ("userId" = auth.uid()) with check ("userId" = auth.uid());
+drop policy if exists user_owns_payments on public."PaymentTransaction";
+create policy user_owns_payments on public."PaymentTransaction" for all to authenticated
+  using ("userId" = auth.uid()) with check ("userId" = auth.uid());
+drop policy if exists member_reads_savings_group on public."SavingsGroup";
+create policy member_reads_savings_group on public."SavingsGroup" for select to authenticated
+  using ("createdBy" = auth.uid() or auth.uid() = any("memberIds"));
+drop policy if exists owner_creates_savings_group on public."SavingsGroup";
+create policy owner_creates_savings_group on public."SavingsGroup" for insert to authenticated
+  with check ("createdBy" = auth.uid());
+drop policy if exists owner_updates_savings_group on public."SavingsGroup";
+create policy owner_updates_savings_group on public."SavingsGroup" for update to authenticated
+  using ("createdBy" = auth.uid()) with check ("createdBy" = auth.uid());
+drop policy if exists owner_deletes_savings_group on public."SavingsGroup";
+create policy owner_deletes_savings_group on public."SavingsGroup" for delete to authenticated
+  using ("createdBy" = auth.uid());
+drop policy if exists member_owns_group_contributions on public."GroupContribution";
+create policy member_owns_group_contributions on public."GroupContribution" for all to authenticated
+  using ("memberId" = auth.uid())
+  with check ("memberId" = auth.uid() and exists (
+    select 1 from public."SavingsGroup" as savings_group
+    where savings_group.id = "GroupContribution"."groupId"
+      and (savings_group."createdBy" = auth.uid() or auth.uid() = any(savings_group."memberIds"))
+  ));
+drop policy if exists user_owns_notifications on public."Notification";
+create policy user_owns_notifications on public."Notification" for all to authenticated
+  using ("userId" = auth.uid()) with check ("userId" = auth.uid());
+drop policy if exists user_owns_notification_preferences on public."NotificationPreference";
+create policy user_owns_notification_preferences on public."NotificationPreference" for all to authenticated
+  using ("userId" = auth.uid()) with check ("userId" = auth.uid());
+drop policy if exists user_owns_bills on public."Bill";
+create policy user_owns_bills on public."Bill" for all to authenticated
+  using ("userId" = auth.uid()) with check ("userId" = auth.uid());

@@ -1,0 +1,10 @@
+@startuml
+title Financial goal state
+[*] --> Active : createGoal / state = Active
+Active --> Completed : contributeToGoal / currentAmount >= targetAmount
+note right of Active
+The service currently has no goal cancellation or reopening operation.
+Do not infer additional transitions.
+end note
+@enduml
+

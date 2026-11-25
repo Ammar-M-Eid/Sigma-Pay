@@ -1,0 +1,30 @@
+@startuml
+title Communication diagram: member contributes to a savings group
+object "page: GroupSavingsPage" as page
+object "api: apiClient" as api
+object "route: Express route" as route
+object "controller: SigmaPayController" as controller
+object "service: GroupSavingsService" as service
+object "repo: GroupSavingsRepositoryImpl" as repo
+object "group: IGroupSavings" as group
+page -- api
+api -- route
+route -- controller
+controller -- service
+service -- repo
+repo -- group
+page -> api : 1. processGroupDeposit(...)
+api -> route : 1.1 POST /groups/:groupId/deposit
+route -> controller : 1.2 ctlProcessDeposit(...)
+controller -> service : 1.3 contribute(...)
+service -> repo : 1.3.1 findById(groupId)
+repo -> group : 1.3.2 return group
+service -> group : 1.3.3 currentAmount += amount
+service -> repo : 1.3.4 save(group)
+route -> api : 2. success response
+api -> page : 2.1 updated result
+note bottom
+  Numbered calls follow a relationship or operation in group-savings-class.puml.
+end note
+@enduml
+

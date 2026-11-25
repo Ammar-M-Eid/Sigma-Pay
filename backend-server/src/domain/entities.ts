@@ -7,6 +7,16 @@ export interface IUserAccount {
   securitySettings: ISecuritySettings;
 }
 
+export interface ILoginActivity {
+  activityId: string;
+  userId?: string;
+  email: string;
+  at: string;
+  device: string;
+  ip: string;
+  status: 'Success' | 'Failed';
+}
+
 export interface ICredentials {
   username: string;
   passwordHash: string;
@@ -95,6 +105,20 @@ export interface IPayment {
   merchantId?: string;
   state: string;
   timestamp: string;
+  recurrenceFrequency?: string;
+  nextRunAt?: string;
+}
+
+export interface IBill {
+  billId: string;
+  userId: string;
+  provider: string;
+  accountRef: string;
+  amount: IMoney;
+  dueAt: string;
+  recurring: boolean;
+  status: 'Scheduled' | 'Paid' | 'Cancelled';
+  paidAt?: string;
 }
 
 export interface IGroupSavings {

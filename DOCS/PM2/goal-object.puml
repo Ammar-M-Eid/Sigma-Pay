@@ -1,0 +1,15 @@
+@startuml
+title Goal contribution object snapshot
+object "service:GoalService" as service
+object "goals:GoalRepositoryImpl" as goals
+object "goal:G-23" as goal {
+  goalId = G-23
+  userId = U-7
+  target = 5000 EGP
+  current = 4500 EGP
+  state = Active
+}
+service --> goals : goalRepository
+goals --> goal : stored value
+@enduml
+

@@ -1,0 +1,11 @@
+@startuml
+title Read a customer's account
+actor Customer
+participant "AccountService" as S
+participant "AccountsRepositoryImpl" as R
+Customer -> S : getAccount("A-204")
+S -> R : findById("A-204")
+R --> S : account A-204
+S --> Customer : account A-204
+@enduml
+

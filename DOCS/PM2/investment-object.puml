@@ -1,0 +1,19 @@
+@startuml
+title Investment option strategy object snapshot
+object "router:FeatureHubRouter" as router
+object "strategies: InMemoryInvestmentStrategyStore" as strategies
+object "strategy:U-88" as strategy {
+  userId = U-88
+  optionIds = cash-reserve, broad-market-fund
+  persistence = process-memory
+}
+object "option:cash-reserve" as option {
+  name = Cash reserve
+  category = Cash equivalent
+  source = illustrative-demo
+}
+router --> strategies : strategyStore
+strategies --> strategy : stored preference
+router ..> option : sample catalogue
+@enduml
+

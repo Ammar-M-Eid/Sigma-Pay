@@ -1,228 +1,79 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import apiClient from '../api/apiClient';
 
-interface GoalsPageProps {
-  userId: string;
-}
+interface GoalsPageProps { userId: string; }
+type Goal = { goalId: string; goalType: string; targetAmount: { amount: number }; currentAmount: { amount: number }; deadline: string; priorityLevel: string; state: string };
+const formatMoney = (amount: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount || 0);
 
 const GoalsPage: React.FC<GoalsPageProps> = ({ userId }) => {
-  const [goalType, setGoalType] = useState('Savings');
-  const [targetAmount, setTargetAmount] = useState('');
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [goalType, setGoalType] = useState('Emergency fund');
+  const [target, setTarget] = useState('');
   const [deadline, setDeadline] = useState('');
-  const [priorityLevel, setPriorityLevel] = useState('Medium');
+  const [priority, setPriority] = useState('Medium');
+  const [contributions, setContributions] = useState<Record<string, string>>({});
+  const [recommendation, setRecommendation] = useState('');
   const [message, setMessage] = useState('');
 
-  // Progress tracking
-  const [progressGoalId, setProgressGoalId] = useState('');
-  const [progressData, setProgressData] = useState<any>(null);
+  const refresh = useCallback(async () => {
+    const result = await apiClient.getGoals(userId);
+    setGoals(result.goals || []);
+  }, [userId]);
+  useEffect(() => { refresh(); }, [refresh]);
 
-  const handleSetGoal = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const response = await apiClient.createGoal(
-      userId,
-      goalType,
-      parseFloat(targetAmount),
-      deadline,
-      priorityLevel
-    );
+  const createGoal = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const result = await apiClient.createGoal(userId, goalType, Number(target), deadline, priority);
+    setMessage(result.success ? 'Savings goal created.' : result.message || 'Could not create goal.');
+    if (result.success) { setTarget(''); await refresh(); }
+  };
 
-    if (response.success && response.goal) {
-      setMessage(`Goal created successfully! Goal ID: ${response.goal.goalId}`);
-      setProgressGoalId(response.goal.goalId);
-    } else {
-      setMessage('Failed to create goal');
+  const contribute = async (goalId: string) => {
+    const amount = Number(contributions[goalId]);
+    const result = await apiClient.contributeToGoal(goalId, userId, amount);
+    setMessage(result.success ? 'Contribution recorded.' : result.message || 'Could not record contribution.');
+    if (result.success) {
+      const goal = goals.find((item) => item.goalId === goalId);
+      if (goal) {
+        const preferences = await apiClient.getNotificationPreferences(userId);
+        if (preferences.preferences?.goals !== false) {
+          const projected = (goal.currentAmount?.amount || 0) + amount;
+          const isComplete = projected >= (goal.targetAmount?.amount || 0);
+          await apiClient.sendAlert(userId, isComplete ? `Goal complete: ${goal.goalType} reached its target.` : `Goal update: ${goal.goalType} now has ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(projected)} saved.`);
+        }
+      }
+      setContributions((current) => ({ ...current, [goalId]: '' }));
+      await refresh();
     }
   };
 
-  const handleTrackProgress = async () => {
-    if (!progressGoalId) {
-      setMessage('Please create a goal first or enter a goal ID');
-      return;
-    }
-
-    const response = await apiClient.trackProgress(userId, progressGoalId);
-    if (response.success && response.progress) {
-      setProgressData(response.progress);
-    } else {
-      setMessage('Failed to track progress');
-    }
+  const optimize = async () => {
+    const result = await apiClient.getGoalRecommendations(userId, 12, true);
+    const text = result.recommendation?.suggestions?.join(' ') || result.message || 'Recommendation unavailable.';
+    setRecommendation(`${text} This is a sample planning suggestion, not a financial forecast.`);
   };
 
-  return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>Financial Goals</h1>
-
-      <div style={styles.section}>
-        <h2 style={styles.subtitle}>Set Financial Goal</h2>
-        <form onSubmit={handleSetGoal} style={styles.form}>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Goal Type:</label>
-            <select
-              value={goalType}
-              onChange={(e) => setGoalType(e.target.value)}
-              style={styles.input}
-            >
-              <option value="Savings">Savings</option>
-              <option value="Investment">Investment</option>
-              <option value="Emergency Fund">Emergency Fund</option>
-              <option value="Vacation">Vacation</option>
-            </select>
-          </div>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Target Amount ($):</label>
-            <input
-              type="number"
-              value={targetAmount}
-              onChange={(e) => setTargetAmount(e.target.value)}
-              required
-              style={styles.input}
-              step="0.01"
-            />
-          </div>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Deadline:</label>
-            <input
-              type="date"
-              value={deadline}
-              onChange={(e) => setDeadline(e.target.value)}
-              required
-              style={styles.input}
-            />
-          </div>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Priority Level:</label>
-            <select
-              value={priorityLevel}
-              onChange={(e) => setPriorityLevel(e.target.value)}
-              style={styles.input}
-            >
-              <option value="Low">Low</option>
-              <option value="Medium">Medium</option>
-              <option value="High">High</option>
-            </select>
-          </div>
-          <button type="submit" style={styles.button}>
-            Set Goal
-          </button>
+  return <div className="workflow-page">
+    <div className="module-heading"><div><span className="eyebrow">SAVE WITH PURPOSE</span><h1>Savings goals</h1></div><p>Choose a target and date, then record contributions and follow your progress.</p></div>
+    <div className="workflow-grid">
+      <section className="workflow-panel"><div className="panel-heading"><span className="eyebrow">NEW TARGET</span><h2>Create a goal</h2></div>
+        <form className="bill-form" onSubmit={createGoal}>
+          <label>Goal name<input value={goalType} onChange={(event) => setGoalType(event.target.value)} required maxLength={60} /></label>
+          <label>Target amount<input type="number" min="1" step="0.01" value={target} onChange={(event) => setTarget(event.target.value)} required placeholder="0.00" /></label>
+          <div className="form-two-column"><label>Target date<input type="date" value={deadline} onChange={(event) => setDeadline(event.target.value)} required /></label><label>Priority<select value={priority} onChange={(event) => setPriority(event.target.value)}><option>Low</option><option>Medium</option><option>High</option></select></label></div>
+          <button className="button-primary" type="submit">Create goal</button>
         </form>
-        {message && <p style={styles.message}>{message}</p>}
-      </div>
-
-      <div style={styles.section}>
-        <h2 style={styles.subtitle}>Track Progress</h2>
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Goal ID:</label>
-          <input
-            type="text"
-            value={progressGoalId}
-            onChange={(e) => setProgressGoalId(e.target.value)}
-            style={styles.input}
-            placeholder="Enter goal ID or create a new goal"
-          />
-        </div>
-        <button onClick={handleTrackProgress} style={styles.button}>
-          Track Progress
-        </button>
-        
-        {progressData && (
-          <div style={styles.progressCard}>
-            <h3>Progress Report</h3>
-            <p><strong>Goal ID:</strong> {progressData.goalId}</p>
-            <p><strong>Completion:</strong> {progressData.percentageComplete.toFixed(2)}%</p>
-            <p><strong>Remaining Amount:</strong> ${progressData.remainingAmount.amount}</p>
-            <p><strong>Days Remaining:</strong> {progressData.daysRemaining}</p>
-            <p><strong>Status:</strong> {progressData.onTrack ? '✅ On Track' : '⚠️ Behind Schedule'}</p>
-          </div>
-        )}
-      </div>
+      </section>
+      <section className="workflow-panel recommendation-panel"><div className="panel-heading"><span className="eyebrow">PLANNING ASSISTANT</span><h2>Find a steady pace</h2></div><p>Get a sample contribution suggestion based on a 12-month planning window. It does not connect to a bank or predict investment returns.</p><button className="button-outline" type="button" onClick={optimize}>Suggest a plan</button>{recommendation && <p className="inline-message" role="status">{recommendation}</p>}</section>
     </div>
-  );
-};
-
-const styles: { [key: string]: React.CSSProperties } = {
-  container: {
-    maxWidth: '900px',
-    margin: '30px auto',
-    padding: '30px',
-  },
-  title: {
-    textAlign: 'center',
-    color: 'white',
-    marginBottom: '40px',
-    fontSize: '36px',
-    fontWeight: 'bold',
-    textShadow: '2px 2px 4px rgba(0, 0, 0, 0.2)',
-  },
-  section: {
-    background: 'white',
-    padding: '30px',
-    borderRadius: '16px',
-    marginBottom: '24px',
-    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)',
-    animation: 'fadeInUp 0.5s ease',
-  },
-  subtitle: {
-    color: '#2d3748',
-    marginBottom: '24px',
-    fontSize: '22px',
-    fontWeight: '600',
-    borderBottom: '3px solid #9C27B0',
-    paddingBottom: '10px',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  formGroup: {
-    marginBottom: '20px',
-  },
-  label: {
-    display: 'block',
-    marginBottom: '8px',
-    fontWeight: '600',
-    color: '#4a5568',
-    fontSize: '14px',
-  },
-  input: {
-    width: '100%',
-    padding: '14px 16px',
-    fontSize: '16px',
-    border: '2px solid #e2e8f0',
-    borderRadius: '10px',
-    boxSizing: 'border-box',
-    transition: 'all 0.3s ease',
-    backgroundColor: '#f7fafc',
-  },
-  button: {
-    padding: '16px',
-    fontSize: '17px',
-    background: 'linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%)',
-    color: 'white',
-    border: 'none',
-    borderRadius: '10px',
-    cursor: 'pointer',
-    marginTop: '12px',
-    fontWeight: '600',
-    boxShadow: '0 4px 15px rgba(156, 39, 176, 0.4)',
-  },
-  message: {
-    marginTop: '20px',
-    padding: '16px',
-    background: 'linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%)',
-    border: 'none',
-    borderRadius: '10px',
-    color: '#2d3748',
-    fontWeight: '500',
-    boxShadow: '0 4px 12px rgba(156, 39, 176, 0.2)',
-  },
-  progressCard: {
-    marginTop: '24px',
-    padding: '24px',
-    background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-    borderRadius: '12px',
-    border: 'none',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-  },
+    <section className="workflow-panel goals-list-panel"><div className="panel-heading panel-heading-row"><div><span className="eyebrow">YOUR PROGRESS</span><h2>Active goals</h2></div><button className="button-quiet" type="button" onClick={refresh}>Refresh</button></div>
+      {goals.length === 0 ? <div className="empty-state"><strong>No goals yet</strong><p>Add a goal and make progress with each contribution.</p></div> : <div className="goal-grid">{goals.map((goal) => {
+        const current = goal.currentAmount?.amount || 0; const targetAmount = goal.targetAmount?.amount || 0; const progress = targetAmount ? Math.min(100, current / targetAmount * 100) : 0;
+        return <article key={goal.goalId} className="goal-card"><div className="goal-card-top"><div><span className="eyebrow">{goal.priorityLevel} PRIORITY</span><h3>{goal.goalType}</h3></div><span className="goal-status">{goal.state}</span></div><strong className="goal-amount">{formatMoney(current)} <span>of {formatMoney(targetAmount)}</span></strong><div className="budget-progress"><span style={{ width: `${progress}%` }} /></div><div className="goal-meta"><span>{Math.round(progress)}% complete</span><span>Target {new Date(goal.deadline).toLocaleDateString()}</span></div><div className="contribution-row"><label className="sr-only" htmlFor={`contribution-${goal.goalId}`}>Contribution amount for {goal.goalType}</label><input id={`contribution-${goal.goalId}`} type="number" min="0.01" step="0.01" placeholder="Amount" value={contributions[goal.goalId] || ''} onChange={(event) => setContributions((currentValues) => ({ ...currentValues, [goal.goalId]: event.target.value }))} /><button className="button-outline" type="button" onClick={() => contribute(goal.goalId)}>Add contribution</button></div></article>;
+      })}</div>}
+    </section>
+    {message && <p className="inline-message" role="status">{message}</p>}
+  </div>;
 };
 
 export default GoalsPage;

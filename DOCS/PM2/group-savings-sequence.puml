@@ -1,0 +1,27 @@
+@startuml
+title Sequence: member contributes to a savings group
+actor Member
+participant "GroupSavingsPage" as UI
+participant apiClient as API
+participant "Express route" as Route
+participant SigmaPayController as Controller
+participant GroupSavingsService as Service
+participant GroupSavingsRepositoryImpl as Repo
+participant "group: IGroupSavings" as Group
+Member -> UI: enter G-104, U-9, 500 EGP
+UI -> API: processGroupDeposit(G-104, U-9, 500)
+API -> Route: POST /groups/G-104/deposit
+Route -> Controller: ctlProcessDeposit(...)
+Controller -> Service: contribute(G-104, U-9, 500)
+Service -> Repo: findById(G-104)
+Repo --> Service: group
+Service -> Group: currentAmount += 500
+Service -> Repo: save(group)
+Repo --> Service: saved groupId
+Service --> Controller: void
+Controller --> Route: success response
+Route --> API: HTTP response
+API --> UI: updated result
+UI --> Member: show group balance
+@enduml
+

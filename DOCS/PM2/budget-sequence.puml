@@ -1,0 +1,16 @@
+@startuml
+title Record a budgeted expense
+actor Customer
+participant "BudgetService" as S
+participant "BudgetRepositoryImpl" as B
+participant "TransactionRepositoryImpl" as T
+Customer -> S : recordExpense("U-7", 300, "Food")
+S -> B : findByUserId("U-7")
+B --> S : [B-11]
+S -> B : save(B-11 with spent=1500)
+B --> S : "B-11"
+S -> T : save(new transaction)
+T --> S : transactionId
+S --> Customer : true
+@enduml
+

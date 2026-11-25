@@ -1,0 +1,21 @@
+@startuml
+title Investment strategy communication
+object "customer:Customer" as C
+object "router:FeatureHubRouter" as R
+object "strategies: InMemoryInvestmentStrategyStore" as M
+C -> R : 1: PUT /investments/U-88/strategy [optionIds]
+R -> R : 1.1: validate IDs against catalogue
+R -> M : 1.2: save(strategy for U-88)
+M --> R : 1.3: saved strategy
+R --> C : 2: success, illustrative-demo
+C -> R : 3: GET /investments/U-88/strategy
+R -> M : 3.1: get("U-88")
+M --> R : 3.2: saved strategy
+R --> C : 4: strategy, process-memory
+note bottom
+FeatureHubRouter and strategies Map links are modeled in system-service-classes.puml.
+feature-hub-scenario.test.ts checks valid persistence and rejects unknown options.
+This is sample information, not market data or financial advice.
+end note
+@enduml
+
