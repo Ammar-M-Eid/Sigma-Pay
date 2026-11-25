@@ -9,3 +9,4 @@ S -> R : save(P-1 with state=Completed)
 R --> S : "P-1"
 S --> Customer : success, paymentId=P-1
 @enduml
+

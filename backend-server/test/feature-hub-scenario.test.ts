@@ -1,8 +1,8 @@
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const express = require('express');
-const { createServer } = require('node:http');
-const { createFeatureHubRouter } = require('../dist/api/featureHub');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import express from 'express';
+import { createServer } from 'node:http';
+import { createFeatureHubRouter } from '../src/api/featureHub';
 
 test('stores a valid illustrative strategy and rejects unknown options', async (t) => {
   const app = express();
@@ -35,3 +35,4 @@ test('stores a valid illustrative strategy and rejects unknown options', async (
   assert.equal(invalid.status, 400);
   assert.deepEqual(calls, [['save', 'U-88'], ['get', 'U-88']]);
 });
+

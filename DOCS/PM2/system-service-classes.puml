@@ -205,3 +205,4 @@ Implementations are under backend-server/src/domain, src/services and src/data.
 Repositories are in-memory prototype adapters; data is not persistent.
 end note
 @enduml
+

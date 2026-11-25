@@ -1,6 +1,6 @@
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const { PaymentsServiceBL } = require('../dist/services/services');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { PaymentsServiceBL } from '../src/services/services';
 
 function fixture() {
   const payments = new Map();
@@ -87,3 +87,4 @@ test('rejects every payment operation that is invalid for each modeled state', (
     }
   }
 });
+

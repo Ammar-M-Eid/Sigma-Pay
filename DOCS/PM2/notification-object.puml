@@ -12,3 +12,4 @@ message = Budget reached 80 percent
 service --> repo : notificationRepository
 repo --> notification : stored value
 @enduml
+

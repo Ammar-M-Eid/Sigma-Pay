@@ -15,7 +15,7 @@ Both pipelines use Node 22, build the TypeScript backend, execute tests with `c8
 
 ## Test framework alignment
 
-The team accepts TypeScript unit tests and does not want JUnit. Tests in `backend-server/test` use Node's built in runner and repository spies against compiled TypeScript services. They cover account lookup, budget expenses, goal completion, group savings, investment strategy storage, notification alerts, and valid and invalid payment state transitions. The final local run passed 13 tests; `c8` reported 62.38% statement coverage, 88.23% branch coverage, and 34.48% function coverage. Run with `cd backend-server && npm test`.
+The team accepts TypeScript unit tests and does not want JUnit. Tests in `backend-server/test` are TypeScript files using Node's built in runner through `tsx`, with repository spies against the TypeScript services. They cover account lookup, budget expenses, goal completion, group savings, investment strategy storage, notification alerts, and valid and invalid payment state transitions. Run with `cd backend-server && npm test`.
 
 ## Configure SonarQube
 

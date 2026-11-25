@@ -9,3 +9,4 @@ S -> R : save(notification with generated UUID)
 R --> S : notificationId
 S --> Event : true
 @enduml
+

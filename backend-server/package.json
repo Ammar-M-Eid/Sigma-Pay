@@ -8,7 +8,7 @@
     "start": "node dist/server.js",
     "dev": "ts-node src/server.ts",
     "watch": "tsc -w",
-    "test": "npm run build && c8 --reporter=text --reporter=lcov node --test test/*.test.cjs"
+    "test": "npm run build && c8 --reporter=text --reporter=lcov tsx --test test/*.test.ts"
   },
   "keywords": [
     "sigmapay",
@@ -29,6 +29,7 @@
     "@types/node": "^20.4.2",
     "c8": "^10.1.3",
     "ts-node": "^10.9.1",
+    "tsx": "^4.23.15",
     "typescript": "^5.1.6"
   }
 }

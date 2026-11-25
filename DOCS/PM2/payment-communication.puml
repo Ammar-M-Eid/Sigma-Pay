@@ -12,5 +12,6 @@ R --> S : 1.4: "P-1"
 S --> C : 2: success(paymentId)
 note bottom
 Links match payment-object.puml, payment-state.puml and system-service-classes.puml.
-payment-state.test.cjs verifies the save and all valid/invalid transitions.
+payment-state.test.ts verifies the save and all valid/invalid transitions.
 @enduml
+

@@ -1,6 +1,6 @@
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const { GoalService } = require('../dist/services/services');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { GoalService } from '../src/services/services';
 
 test('contribution completes the goal fixture and verifies repository messages', () => {
   const goal = { goalId: 'G-23', userId: 'U-7', goalType: 'Emergency fund', targetAmount: { amount: 5000, currency: { code: 'EGP', symbol: 'E£', exchangeRate: 1 } }, currentAmount: { amount: 4500, currency: { code: 'EGP', symbol: 'E£', exchangeRate: 1 } }, deadline: '2026-12-31', priorityLevel: 'High', state: 'Active' };
@@ -15,3 +15,4 @@ test('contribution completes the goal fixture and verifies repository messages',
   service.contributeToGoal('missing', 500);
   assert.deepEqual(calls, [['findById', 'missing']]);
 });
+

@@ -12,3 +12,4 @@ object "goal:G-23" as goal {
 service --> goals : goalRepository
 goals --> goal : stored value
 @enduml
+

@@ -16,3 +16,4 @@ router --> strategies : strategyStore
 strategies --> strategy : stored preference
 router ..> option : sample catalogue
 @enduml
+

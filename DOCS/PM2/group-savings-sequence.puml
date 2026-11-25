@@ -24,3 +24,4 @@ Route --> API: HTTP response
 API --> UI: updated result
 UI --> Member: show group balance
 @enduml
+

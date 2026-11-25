@@ -11,3 +11,4 @@ object "payment:P-1" as payment {
 service --> payments : paymentRepository
 payments --> payment : stored value
 @enduml
+

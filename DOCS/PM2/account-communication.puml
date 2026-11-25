@@ -10,6 +10,7 @@ R --> S : 1.2: return account
 S --> C : 2: return account
 note bottom
 Links match account-object.puml and system-service-classes.puml.
-backend-server/test/account-scenario.test.cjs asserts the repository call and return value.
+backend-server/test/account-scenario.test.ts asserts the repository call and return value.
 end note
 @enduml
+

@@ -1,6 +1,6 @@
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const { NotificationServiceBL } = require('../dist/services/services');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { NotificationServiceBL } from '../src/services/services';
 
 test('sends an alert through the repository with an unread fixture', () => {
   const saved = [];
@@ -16,3 +16,4 @@ test('sends an alert through the repository with an unread fixture', () => {
   assert.equal(service.getNotifications('U-12')[0], saved[0]);
   assert.deepEqual(calls[1], ['findByUserId', 'U-12']);
 });
+

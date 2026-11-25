@@ -1,6 +1,6 @@
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const { AccountService } = require('../dist/services/services');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { AccountService } from '../src/services/services';
 
 test('looks up the account fixture and verifies the repository message', () => {
   const account = { accountId: 'A-204', userId: 'U-7', balance: { amount: 7500, currency: { code: 'EGP', symbol: 'E£', exchangeRate: 1 } } };
@@ -12,3 +12,4 @@ test('looks up the account fixture and verifies the repository message', () => {
   assert.equal(service.getAccount('missing'), null);
   assert.deepEqual(calls, [['findById', 'A-204'], ['findById', 'missing']]);
 });
+

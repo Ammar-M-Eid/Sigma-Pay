@@ -1,6 +1,6 @@
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const { GroupSavingsService } = require('../dist/services/services');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { GroupSavingsService } from '../src/services/services';
 
 function fixture() {
   const groups = new Map();
@@ -58,3 +58,4 @@ test('reports a group snapshot and returns a not found result for an invalid id'
   assert.equal(service.generateGroupReport('G-104'), 'Group: Family trip\nTarget: 12000 EGP\nCurrent: 2400 EGP\nMembers: 2');
   assert.equal(service.generateGroupReport('missing'), 'Group not found');
 });
+

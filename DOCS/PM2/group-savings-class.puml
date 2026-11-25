@@ -52,3 +52,4 @@ note bottom of GroupSavingsRepositoryImpl
   Process-local map. No database persistence.
 end note
 @enduml
+

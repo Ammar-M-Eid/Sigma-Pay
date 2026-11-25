@@ -12,6 +12,7 @@ S -> R : 1.4: save(G-23)
 R --> S : 1.5: "G-23"
 S --> C : 2: return
 note bottom
-Links match system-service-classes.puml. Fixture and repository calls are checked in goal-scenario.test.cjs.
+Links match system-service-classes.puml. Fixture and repository calls are checked in goal-scenario.test.ts.
 end note
 @enduml
+

@@ -14,7 +14,8 @@ M --> R : 3.2: saved strategy
 R --> C : 4: strategy, process-memory
 note bottom
 FeatureHubRouter and strategies Map links are modeled in system-service-classes.puml.
-feature-hub-scenario.test.cjs checks valid persistence and rejects unknown options.
+feature-hub-scenario.test.ts checks valid persistence and rejects unknown options.
 This is sample information, not market data or financial advice.
 end note
 @enduml
+

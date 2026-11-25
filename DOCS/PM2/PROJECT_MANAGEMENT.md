@@ -29,12 +29,12 @@ Estimation error for the finished sprint is `abs(planned velocity - actual veloc
 | --- | --- | ---: | --- | --- |
 | [SCRUM-23](https://aiu-team-jkoscu8b.atlassian.net/browse/SCRUM-23) | Record and categorize an expense | 5 | Mohammed Eslam | To Do |
 | [SCRUM-26](https://aiu-team-jkoscu8b.atlassian.net/browse/SCRUM-26) | Create and track financial goal | 5 | Omar | To Do |
-| [SCRUM-45](https://aiu-team-jkoscu8b.atlassian.net/browse/SCRUM-45) | Review service health | 3 | Andrew | To Do |
+| [SCRUM-45](https://aiu-team-jkoscu8b.atlassian.net/browse/SCRUM-45) | Review service health | 3 | Mohammed Eslam | To Do |
 
 
 ## Proposal ownership applied to Jira
 
-The user directed us to use the proposal's suggested owners. Jira story assignees now follow that map: US1–US4 account/auth and US18–US19 payments to Ammar; US5–US8 budgets/trends and US15–US16 reports to Mohammed Eslam; US9–US12 goals/group savings to Omar; US13–US14 investments/advisory and US21 tutoring to Andrew; US17 card activity, US20 offers, and US22 notifications to Mohamed Ibrahim. US23–US24 retain their existing assignees because the proposal does not allocate those two admin/platform stories to a named member. SCRUM-47 is assigned to Ammar for project coordination.
+The user directed us to use the proposal's suggested owners. Jira story assignees now follow that map: US1–US4 account/auth and US18–US19 payments to Ammar; US5–US8 budgets/trends, US15–US16 reports, and US24 service health to Mohammed Eslam; US9–US12 goals/group savings to Omar; US13–US14 investments/advisory and US21 tutoring to Andrew; US17 card activity, US20 offers, and US22 notifications to Mohamed Ibrahim; US23 banker metrics to Ammar. SCRUM-47 is assigned to Ammar for project coordination.
 
 Jira's existing US1–US24 story point values match the proposal's Fibonacci estimate table. The proposal describes them as planning assumptions to review with Planning Poker, not as recorded voting results. No product story was created or changed for M2, so no new story estimate was added; SCRUM-47 is an unestimated Task. Keep the Poker outcome labeled provisional until the team records its vote.
 

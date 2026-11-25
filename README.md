@@ -110,4 +110,4 @@ The M2 design-to-code mapping is documented in `DOCS/PM2/TRACEABILITY.md`.
 - Jenkins: `Jenkinsfile`; see `DOCS/PM2/DEVOPS.md` for the required tool setup and comparison
 - Sprint data and Jira evidence: `DOCS/PM2/PROJECT_MANAGEMENT.md` and the existing sprint workbook
 
-The team has accepted TypeScript unit tests instead of JUnit. The backend tests use Node's test runner and repository spies against the compiled TypeScript services, with coverage collected by `c8`. See the PM2 notes for pipeline setup and remaining hosted evidence.
+The team has accepted TypeScript unit tests instead of JUnit. The backend `.test.ts` files use Node's test runner through `tsx` and repository spies against the TypeScript services, with coverage collected by `c8`. See the PM2 notes for pipeline setup and remaining hosted evidence.

@@ -14,6 +14,7 @@ T --> S : 1.6: transactionId
 S --> C : 2: true
 note bottom
 All calls follow links in system-service-classes.puml.
-backend-server/test/budget-scenario.test.cjs verifies interaction order.
+backend-server/test/budget-scenario.test.ts verifies interaction order.
 end note
 @enduml
+
