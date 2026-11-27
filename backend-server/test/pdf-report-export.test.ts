@@ -131,3 +131,28 @@ test('TC-GROUP-005 creates a shared target and records only valid member contrib
   const report = await fetch(`${baseUrl}/groups/${created.group.groupId}/report`);
   assert.match((await report.json() as { report: string }).report, /Target: 12000 USD[\s\S]*U-7: 500 USD/);
 });
+
+test('TC-BUDGET-002 returns spending trends and threshold alerts from recorded expenses', async (t) => {
+  const app = express();
+  app.use(express.json());
+  app.use(createApiRouter(buildController(new TransactionRepositoryImpl())));
+  const server = createServer(app);
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  t.after(() => new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve())));
+  const address = server.address();
+  assert.ok(address && typeof address !== 'string');
+  const baseUrl = `http://127.0.0.1:${address.port}`;
+
+  const created = await fetch(`${baseUrl}/budgets/create`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ userId: 'U-BUDGET-2', totalAmount: 1000, startDate: '2026-11-01', endDate: '2026-11-30', categories: ['Food'] }) });
+  assert.equal((await created.json() as { success: boolean }).success, true);
+  const expense = await fetch(`${baseUrl}/budgets/expense`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ userId: 'U-BUDGET-2', amount: 850, category: 'Food' }) });
+  assert.equal((await expense.json() as { success: boolean }).success, true);
+
+  const alert = await fetch(`${baseUrl}/budgets/U-BUDGET-2/alerts/check`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ thresholdPercent: 80 }) });
+  const alertResult = await alert.json();
+  assert.equal(alertResult.alerts.length, 1);
+  assert.equal(alertResult.alerts[0].spent, 850);
+
+  const trends = await fetch(`${baseUrl}/budgets/U-BUDGET-2/trends`);
+  assert.deepEqual((await trends.json()).trends, [{ category: 'Food', amount: 850, currency: 'USD' }]);
+});
