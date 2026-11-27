@@ -448,7 +448,7 @@ export class ReportingService implements IReportingService {
           '----------------------------------------------------------------',
         ]
         : ['SigmaPay Financial Report (continued)', '----------------------------------------------------------------'];
-      const capacity = pageCapacity - header.length - 1;
+      const capacity = 47 - header.length - 1;
       const body = reportLines.slice(cursor, cursor + capacity);
       cursor += body.length;
       pages.push([...header, ...body, `Page ${pageIndex + 1} of ${pageCount}`]);
