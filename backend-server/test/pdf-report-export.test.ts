@@ -97,3 +97,37 @@ test('TC-REPORT-007 serves a downloadable PDF and rejects an invalid date range'
   assert.equal(invalid.status, 400);
   assert.equal((await invalid.json()).success, false);
 });
+
+test('TC-GROUP-005 creates a shared target and records only valid member contributions', async (t) => {
+  const app = express();
+  app.use(express.json());
+  app.use(createApiRouter(buildController(new TransactionRepositoryImpl())));
+  const server = createServer(app);
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  t.after(() => new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve())));
+  const address = server.address();
+  assert.ok(address && typeof address !== 'string');
+  const baseUrl = `http://127.0.0.1:${address.port}`;
+
+  const createdResponse = await fetch(`${baseUrl}/groups/create`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ groupName: 'Family trip', members: ['U-7'], targetAmount: 12000 }),
+  });
+  assert.equal(createdResponse.status, 200);
+  const created = await createdResponse.json() as { success: boolean; group: { groupId: string; targetAmount: { amount: number } } };
+  assert.equal(created.success, true);
+  assert.equal(created.group.targetAmount.amount, 12000);
+
+  const deposit = await fetch(`${baseUrl}/groups/${created.group.groupId}/deposit`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ memberId: 'U-7', amount: 500 }),
+  });
+  assert.equal((await deposit.json() as { success: boolean }).success, true);
+  const unauthorized = await fetch(`${baseUrl}/groups/${created.group.groupId}/deposit`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ memberId: 'U-88', amount: 700 }),
+  });
+  assert.equal((await unauthorized.json() as { success: boolean }).success, false);
+  const report = await fetch(`${baseUrl}/groups/${created.group.groupId}/report`);
+  assert.match((await report.json() as { report: string }).report, /Target: 12000 USD[\s\S]*U-7: 500 USD/);
+});

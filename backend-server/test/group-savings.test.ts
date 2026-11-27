@@ -38,24 +38,29 @@ test('TC-GROUP-002 joins a member once and avoids duplicate membership', () => {
   assert.deepEqual(calls, [['findById', 'G-104']]);
 });
 
-test('TC-GROUP-003 records a contribution for a known group only', () => {
+test('TC-GROUP-003 records member contributions and rejects invalid or non-member deposits', () => {
   const { service, calls } = fixture();
   const group = sampleGroup();
   service.createGroup(group);
   calls.length = 0;
-  service.contribute('G-104', 'U-9', 500);
+  assert.equal(service.contribute('G-104', 'U-9', 500), true);
   assert.equal(group.currentAmount.amount, 2900);
+  assert.deepEqual([...group.contributions ?? []], [['U-9', 500]]);
   assert.deepEqual(calls, [['findById', 'G-104'], ['save', 'G-104']]);
   calls.length = 0;
-  service.contribute('missing', 'member-1', 10);
+  assert.equal(service.contribute('missing', 'member-1', 10), false);
   assert.deepEqual(calls, [['findById', 'missing']]);
+  assert.equal(service.contribute('G-104', 'U-88', 20), false);
+  assert.equal(service.contribute('G-104', 'U-9', -1), false);
   assert.equal(group.currentAmount.amount, 2900);
 });
 
-test('TC-GROUP-004 reports group totals and handles an unknown group', () => {
+test('TC-GROUP-004 reports group targets, member contributions and handles an unknown group', () => {
   const { service } = fixture();
-  service.createGroup(sampleGroup());
-  assert.equal(service.generateGroupReport('G-104'), 'Group: Family trip\nTarget: 12000 EGP\nCurrent: 2400 EGP\nMembers: 2');
+  const group = sampleGroup();
+  group.contributions = new Map([['U-7', 1000], ['U-9', 1400]]);
+  service.createGroup(group);
+  assert.equal(service.generateGroupReport('G-104'), 'Group: Family trip\nTarget: 12000 EGP\nCurrent: 2400 EGP\nMembers: 2\nContributions:\nU-7: 1000 EGP\nU-9: 1400 EGP');
   assert.equal(service.generateGroupReport('missing'), 'Group not found');
 });
 
