@@ -11,10 +11,11 @@ Acceptance criteria are tied to the final proposal's proposed service owners. Ow
 | Account and authentication | FR 1.1, 1.7 | Valid registration normalizes and stores a safe account; invalid/duplicate inputs and invalid credentials are rejected; login activity is user-scoped. | TC-ACCOUNT-001-002, TC-AUTH-001-004 | Ammar Mahmoud Eid Ahmed |
 | Budgets and expenses | FR 2.1-2.3 | Valid expense updates the budget and transaction; invalid amounts cause no writes. | TC-BUDGET-001 | Mohammed Eslam Saad Abdelhakeem |
 | Goals | FR 3.1 | Contributions update progress, complete at target, and missing goal IDs do not mutate data. | TC-GOAL-001 | Omar Ali Abdelhafiz Morsi |
-| Group savings | FR 4.1-4.4 | Group creation with target, unique membership, per-member valid contribution balance and report totals behave correctly. | TC-GROUP-001-005 | Omar Ali Abdelhafiz Morsi |
+| Group savings | FR 4.1-4.4 | Group creation with target, unique membership, per-member valid contribution balance and report totals behave correctly. | TC-GROUP-001-006 | Omar Ali Abdelhafiz Morsi |
 | Bills and payments | FR 9.1-9.3 | Local bill/payment transitions, owner isolation, scheduling and invalid transition rejection work. | TC-BILL-001-003, TC-PAY-001-004 | Ammar Mahmoud Eid Ahmed |
 | Reporting and analytics | FR 7.1-7.2 | User/date filters and totals are correct; PDF is valid, paginated and downloadable; invalid ranges are rejected. | TC-REPORT-001-007 | Mohammed Eslam Saad Abdelhakeem |
 | Notifications | FR 3.2 (local alert storage only) | New alerts are saved unread and returned only to the owning user. | TC-NOTIFY-001 | Mohamed Ibrahim Mohamed Aly |
+| Learning resources and quizzes | FR 11.1-11.4 | Resources are listed, quizzes are validated/graded, and missed topics produce user-scoped learning recommendations. | TC-LEARN-001 | Andrew Gamal Moris Shokr |
 | Investment preferences | FR 5.2-5.3 (strategy preference only) | Allowed preferences persist; unsupported values are rejected without a write. | TC-INVEST-001 | Andrew Gamal Moris Shokr |
 
 ### Full proposal traceability
@@ -26,14 +27,14 @@ Acceptance criteria are tied to the final proposal's proposed service owners. Ow
 | 2.4 budget alerts; 2.5 trends | None | Not covered. |
 | 3.1 goal creation/tracking | TC-GOAL-001 | Partial: contribution completion and missing goal. Goal editing/deadlines/plans not covered. |
 | 3.2 notifications; 3.3 AI optimization | TC-NOTIFY-001 | Partial: generic in-memory alert storage only; milestone triggers and AI recommendations not covered. |
-| 4.1 group creation/join; 4.2 contributions; 4.3 analytics | TC-GROUP-001-004 | Partial: group creation, membership, contribution history and totals covered; group expenses and export/chart outputs are not covered. FR 4.5 reminders and 4.6 withdrawals are not covered. |
+| 4.1 group creation/join; 4.2 contributions; 4.3 analytics | TC-GROUP-001-006 | Partial: group creation, membership, contribution history and totals covered; group expenses and export/chart outputs are not covered. FR 4.5 reminders are not covered; FR 4.6 withdrawal requests are tested for membership and contributed-share limits (TC-GROUP-006). |
 | 5.1 recommendations; 5.2 option selection; 5.3 strategy; 5.4 portfolio; 5.5 reports; 5.6 market alerts | TC-INVEST-001 | Partial: preference persistence only. No live market data, portfolio execution, investment reports or alerts. |
 | 6.1 insights; 6.2 AI assistant; 6.3 human consultations | None | Not covered; no connected advisor provider. |
 | 7.1 customizable reports; 7.2 export; 7.3 comparisons | TC-REPORT-001-007 | Partial: local filtering/totals and PDF export covered; interactive charts and period comparisons not covered. |
 | 8.1 cards; 8.2 controls/monitoring | None | Not covered; no card provider. |
 | 9.1 bills; 9.2 recurring payments; 9.3 transaction security | TC-BILL-001-003, TC-PAY-001-004 | Partial: in-memory lifecycle/ownership rules; no external processor, automatic execution or security audit. |
 | 10.1-10.5 partner offers | None | Not covered. |
-| 11.1-11.4 tutoring/resources | None | Not covered. |
+| 11.1 lessons/resources; 11.2 quizzes; 11.3 learning recommendations; 11.4 resource library | TC-LEARN-001 | Partial: local static educational content and quiz-based recommendations only; no admin content management or adaptive learning model. |
 
 The source specification also lists non-functional accuracy, performance and security requirements. This suite does not establish the 2-second/3-second/10,000-user targets, AES-256 at-rest/in-transit behavior, MFA, or 10-minute inactivity logout; these require dedicated integration/load/security tests. Test fixtures use in-memory repositories, so persistence across process restarts is outside this evidence.
 
@@ -56,6 +57,7 @@ Fixtures use in-memory repositories and local HTTP requests. Expected and actual
 | TC-GROUP-003 | FR 4.2 | Group contribution | Add 500 to `G-104`; contribute to missing group | Known group total increases; missing group has no effect | Matched | PASS |
 | TC-GROUP-004 | FR 4.3 | Group report | Group with member contributions; missing ID | Target, aggregate/member contributions, and member count returned; missing group reports not found | Matched | PASS |
 | TC-GROUP-005 | FR 4.1-4.2 | Shared target and contribution API | Create group with 12,000 target; member deposit 500; nonmember deposit 700 | Target is persisted; member contribution succeeds and appears in report; nonmember deposit is rejected | Matched | PASS |
+| TC-GROUP-006 | FR 4.6 | Request withdrawal | Member contributed 600; request 400, then over-request 300; nonmember and negative requests | Valid request is recorded Pending; requests beyond contributed share and invalid actors/amounts are rejected without changing group balance | Matched | PASS |
 | TC-BILL-001 | FR 9.1 | Create bill | Bill `B-1` initially marked Paid | Service sets Scheduled and returns it only for its owner | Matched | PASS |
 | TC-BILL-002 | FR 9.1 | Pay bill once | Scheduled bill `B-1` | Bill becomes Paid with a valid timestamp; repeated payment is rejected | Matched | PASS |
 | TC-BILL-003 | FR 9.1, 9.3 | Bill ownership and existence | Missing bill and bill owned by `U-1` requested by `U-2` | Both payment requests are rejected; stored bill remains Scheduled | Matched | PASS |
@@ -72,6 +74,7 @@ Fixtures use in-memory repositories and local HTTP requests. Expected and actual
 | TC-REPORT-007 | FR 7.2 | PDF download endpoint | Spending report range and reversed range | PDF attachment headers/content; invalid range returns 400 | Matched | PASS |
 | TC-NOTIFY-001 | FR 3.2 (local alerts) | Send alert | Alert for `U-12` | Alert is persisted as unread and appears in that userâ€™s history | Matched | PASS |
 | TC-INVEST-001 | FR 5.2-5.3 | Investment strategy | Known options, then unknown option | Valid strategy can be saved/read; unknown option returns HTTP 400 without saving | Matched | PASS |
+| TC-LEARN-001 | FR 11.1-11.4 | Quiz and personalized learning path | Resource list; invalid quiz; learner answers [1, 0, 1] | Resource library is available; invalid quiz rejected; score/feedback returned; resources match missed topics and are isolated by learner | Matched | PASS |
 
 ## 3. Testing code
 
@@ -89,13 +92,13 @@ The command builds the backend, runs all `*.test.ts` files, and writes text and 
 
 ### Local run
 
-Latest local run after commit `bae073b`: **29 passed, 0 failed**. TypeScript compilation passed as part of `npm test`. Coverage: 64.75% statements/lines, 84.87% branches, 67.56% functions overall.
+Latest local run after commit `f956d0b`: **31 passed, 0 failed**. TypeScript compilation passed as part of `npm test`. Coverage: 66.02% statements/lines, 85.87% branches, 68.30% functions overall.
 
 | Coverage scope | Statements / lines | Branches | Functions |
 | --- | ---: | ---: | ---: |
-| All instrumented backend files | 64.75% | 84.87% | 67.56% |
-| `services.ts` | 82.63% | 91.71% | 81.57% |
-| `controller.ts` | 49.16% | 74.54% | 30.90% |
+| All instrumented backend files | 66.02% | 85.87% | 68.30% |
+| `services.ts` | 83.02% | 91.61% | 81.81% |
+| `controller.ts` | 49.23% | 74.54% | 30.35% |
 
 Coverage includes the controller file because account and authentication scenarios exercise it. Several controller routes remain outside these unit scenarios; the overall percentage should not be read as complete application or end-to-end coverage.
 
@@ -103,4 +106,4 @@ PDF checks verify the generated file header, object offsets and cross-reference 
 
 ### GitHub Actions
 
-GitHub Actions run [#32](https://github.com/Ammar-M-Eid/Sigma-Pay/actions/runs/45976252658) for commit `bd7dbaa` shows the `validate` job passed, including backend build/tests/coverage, frontend build, and container image builds. The workflow run also produced the `backend-coverage` artifact. The SonarQube scan succeeded, but its separate quality-gate enforcement step failed (HTTP 403); therefore the overall workflow is marked failed even though project validation passed. See the run page for pipeline evidence and job annotations.
+The last fully inspected hosted run [#32](https://github.com/Ammar-M-Eid/Sigma-Pay/actions/runs/45976252658) passed `validate` and failed only during SonarQube quality-gate enforcement (HTTP 403). Commit `f956d0b` is pushed and its Actions run is in progress; inspect that run for the latest pipeline screenshot and status.
