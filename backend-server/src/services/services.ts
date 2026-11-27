@@ -364,6 +364,23 @@ export class BillService implements IBillService {
 export class ReportingService implements IReportingService {
   constructor(private transactionRepository: ITransactionRepository) {}
 
+  comparePeriods(userId: string, currentStart: string, currentEnd: string, previousStart: string, previousEnd: string) {
+    const ranges = [[currentStart, currentEnd], [previousStart, previousEnd]].map(([startDate, endDate]) => ({
+      start: new Date(`${startDate}T00:00:00.000Z`).getTime(),
+      end: new Date(`${endDate}T23:59:59.999Z`).getTime(),
+    }));
+    if (!userId || ranges.some(({ start, end }) => !Number.isFinite(start) || !Number.isFinite(end) || start > end)) return null;
+    const transactions = this.transactionRepository.findByUserId(userId).filter((transaction) => transaction.category.toLowerCase() !== 'income');
+    const spentIn = (range: { start: number; end: number }) => transactions.filter((transaction) => {
+      const date = new Date(transaction.date).getTime();
+      return date >= range.start && date <= range.end;
+    }).reduce((total, transaction) => total + transaction.amount.amount, 0);
+    const currentSpent = spentIn(ranges[0]);
+    const previousSpent = spentIn(ranges[1]);
+    const change = currentSpent - previousSpent;
+    return { currentSpent, previousSpent, change, changePercent: previousSpent === 0 ? null : Number((change / previousSpent * 100).toFixed(2)) };
+  }
+
   generateReport(filter: any, type: string): IReport | null {
     if (!filter?.userId || !['monthly', 'income', 'spending'].includes(type)) return null;
     const start = filter.startDate ? new Date(`${filter.startDate}T00:00:00`).getTime() : Number.NEGATIVE_INFINITY;

@@ -384,6 +384,10 @@ export class Controller {
     return this.reportingService.generateReport({ userId, startDate, endDate }, reportType);
   }
 
+  ctlCompareReportPeriods(userId: string, currentStart: string, currentEnd: string, previousStart: string, previousEnd: string) {
+    return this.reportingService.comparePeriods(userId, currentStart, currentEnd, previousStart, previousEnd);
+  }
+
   ctlExportToPDF(userId: string, reportType: string, startDate?: string, endDate?: string): Buffer | null {
     const report = this.reportingService.generateReport({ userId, startDate, endDate }, reportType);
     return report ? this.reportingService.exportToPDF(report) : null;
@@ -677,6 +681,11 @@ export function createApiRouter(controller: Controller): Router {
     }
     const result = controller.ctlGenerateReport(req.params.userId, reportType, startDate, endDate);
     res.json({ success: !!result, report: result?.content, reportType, generatedAt: result?.generatedAt });
+  });
+  router.post('/reports/:userId/compare', (req: Request, res: Response) => {
+    const { currentStart, currentEnd, previousStart, previousEnd } = req.body;
+    const comparison = controller.ctlCompareReportPeriods(req.params.userId, currentStart, currentEnd, previousStart, previousEnd);
+    res.status(comparison ? 200 : 400).json({ success: !!comparison, comparison });
   });
   router.get('/reports/:userId/export', (req: Request, res: Response) => {
     const type = ['income', 'spending'].includes(String(req.query.type)) ? String(req.query.type) : 'monthly';

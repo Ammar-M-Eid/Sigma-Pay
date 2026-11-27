@@ -75,6 +75,7 @@ export interface IBillService {
 
 export interface IReportingService {
   generateReport(filter: any, type: string): IReport | null;
+  comparePeriods(userId: string, currentStart: string, currentEnd: string, previousStart: string, previousEnd: string): { currentSpent: number; previousSpent: number; change: number; changePercent: number | null } | null;
   generateIncomeStatement(userId: string): string;
   generateMonthlySummary(userId: string): string;
   exportToPDF(report: IReport): Buffer;
