@@ -156,3 +156,31 @@ test('TC-BUDGET-002 returns spending trends and threshold alerts from recorded e
   const trends = await fetch(`${baseUrl}/budgets/U-BUDGET-2/trends`);
   assert.deepEqual((await trends.json()).trends, [{ category: 'Food', amount: 850, currency: 'USD' }]);
 });
+
+test('TC-REPORT-008 compares user spending across two valid periods', async (t) => {
+  const transactions = new TransactionRepositoryImpl();
+  transactions.save({ transactionId: 'T-CURRENT', userId: 'U-COMPARE', category: 'Food', amount: { amount: 120, currency: { code: 'USD', symbol: '$', exchangeRate: 1 } }, date: '2026-11-15T12:00:00.000Z', paymentMethod: 'card' });
+  transactions.save({ transactionId: 'T-PREVIOUS', userId: 'U-COMPARE', category: 'Rent', amount: { amount: 100, currency: { code: 'USD', symbol: '$', exchangeRate: 1 } }, date: '2026-10-15T12:00:00.000Z', paymentMethod: 'card' });
+  const app = express();
+  app.use(express.json());
+  app.use(createApiRouter(buildController(transactions)));
+  const server = createServer(app);
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  t.after(() => new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve())));
+  const address = server.address();
+  assert.ok(address && typeof address !== 'string');
+  const baseUrl = `http://127.0.0.1:${address.port}`;
+  const response = await fetch(`${baseUrl}/reports/U-COMPARE/compare`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ currentStart: '2026-11-01', currentEnd: '2026-11-30', previousStart: '2026-10-01', previousEnd: '2026-10-31' }),
+  });
+  const result = await response.json();
+  assert.equal(response.status, 200);
+  assert.deepEqual(result.comparison, { currentSpent: 120, previousSpent: 100, change: 20, changePercent: 20 });
+
+  const invalid = await fetch(`${baseUrl}/reports/U-COMPARE/compare`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ currentStart: '2026-12-01', currentEnd: '2026-11-01', previousStart: '2026-10-01', previousEnd: '2026-10-31' }),
+  });
+  assert.equal(invalid.status, 400);
+});
