@@ -357,8 +357,7 @@ export class Controller {
 
   ctlProcessDeposit(groupId: string, memberId: string, amount: number): boolean {
     try {
-      this.groupSavingsService.contribute(groupId, memberId, amount);
-      return true;
+      return this.groupSavingsService.contribute(groupId, memberId, amount);
     } catch (error) {
       return false;
     }

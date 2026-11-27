@@ -258,14 +258,14 @@ export class GroupSavingsService implements IGroupSavingsService {
     }
   }
 
-  contribute(groupId: string, userId: string, amount: number): void {
+  contribute(groupId: string, userId: string, amount: number): boolean {
     const group = this.groupSavingsRepository.findById(groupId);
-    if (group && group.members.includes(userId) && Number.isFinite(amount) && amount > 0) {
-      group.contributions ??= {};
-      group.contributions[userId] = (group.contributions[userId] ?? 0) + amount;
-      group.currentAmount.amount += amount;
-      this.groupSavingsRepository.save(group);
-    }
+    if (!group || !group.members.includes(userId) || !Number.isFinite(amount) || amount <= 0) return false;
+    group.contributions ??= {};
+    group.contributions[userId] = (group.contributions[userId] ?? 0) + amount;
+    group.currentAmount.amount += amount;
+    this.groupSavingsRepository.save(group);
+    return true;
   }
 
   generateGroupReport(groupId: string): string {
