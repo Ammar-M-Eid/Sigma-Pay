@@ -9,7 +9,7 @@ Acceptance criteria are tied to the final proposal's proposed service owners. Ow
 | Service | SRS FR | What must be true to pass | Test cases | Proposed owner |
 | --- | --- | --- | --- | --- |
 | Account and authentication | FR 1.1, 1.7 | Valid registration normalizes and stores a safe account; invalid/duplicate inputs and invalid credentials are rejected; login activity is user-scoped. | TC-ACCOUNT-001-002, TC-AUTH-001-004 | Ammar Mahmoud Eid Ahmed |
-| Budgets and expenses | FR 2.1-2.3 | Valid expense updates the budget and transaction; invalid amounts cause no writes. | TC-BUDGET-001 | Mohammed Eslam Saad Abdelhakeem |
+| Budgets and expenses | FR 2.1-2.3 | Valid expense updates the budget and transaction; invalid amounts cause no writes; threshold alerts and category trends reflect persisted expenses. | TC-BUDGET-001-002 | Mohammed Eslam Saad Abdelhakeem |
 | Goals | FR 3.1 | Contributions update progress, complete at target, and missing goal IDs do not mutate data. | TC-GOAL-001 | Omar Ali Abdelhafiz Morsi |
 | Group savings | FR 4.1-4.4 | Group creation with target, unique membership, per-member valid contribution balance and report totals behave correctly. | TC-GROUP-001-006 | Omar Ali Abdelhafiz Morsi |
 | Bills and payments | FR 9.1-9.3 | Local bill/payment transitions, owner isolation, scheduling and invalid transition rejection work. | TC-BILL-001-003, TC-PAY-001-004 | Ammar Mahmoud Eid Ahmed |
@@ -23,7 +23,7 @@ Acceptance criteria are tied to the final proposal's proposed service owners. Ow
 | Proposal FR | Coverage in this test suite | Status / limitation |
 | --- | --- | --- |
 | 1.1 account creation; 1.7 login activity | TC-AUTH-001-004 | Partial: local service paths only. Verification, password reset/change and 2FA (FR 1.2-1.6) are not covered. |
-| 2.1 budgets; 2.2-2.3 expenses/categories | TC-BUDGET-001 | Partial: one valid/invalid expense scenario; budget creation, category rules, alerts and trends are not covered. |
+| 2.1 budgets; 2.2-2.3 expenses/categories; 2.4 alerts; 2.5 trends | TC-BUDGET-001-002 | Partial: expense, threshold alert and category trend paths tested; no scheduled alert delivery or visual time-series dashboard. |
 | 2.4 budget alerts; 2.5 trends | None | Not covered. |
 | 3.1 goal creation/tracking | TC-GOAL-001 | Partial: contribution completion and missing goal. Goal editing/deadlines/plans not covered. |
 | 3.2 notifications; 3.3 AI optimization | TC-NOTIFY-001 | Partial: generic in-memory alert storage only; milestone triggers and AI recommendations not covered. |
@@ -51,6 +51,7 @@ Fixtures use in-memory repositories and local HTTP requests. Expected and actual
 | TC-AUTH-003 | FR 1.1 | Login credentials | Correct then incorrect password | Correct credentials authenticate; wrong password fails; both attempts are recorded | Matched | PASS |
 | TC-AUTH-004 | FR 1.1 | Disabled account | Correct credentials for disabled account | Login is rejected | Matched | PASS |
 | TC-BUDGET-001 | FR 2.1-2.3 | Record expense | Food expense 300; then amount -1 | Valid expense updates budget and transaction; invalid expense makes no repository writes | Matched | PASS |
+| TC-BUDGET-002 | FR 2.4-2.5 | Budget alert and spending trend | Budget 1,000; Food expense 850; threshold 80% | Alert returned at threshold; trend aggregates Food to 850 USD | Matched | PASS |
 | TC-GOAL-001 | FR 3.1 | Goal contribution | Add 500 to goal with 500 remaining; then missing goal | Goal reaches target and completes; missing goal is unchanged | Matched | PASS |
 | TC-GROUP-001 | FR 4.1 | Create savings group | Group `G-104` | Group is persisted and its ID returned | Matched | PASS |
 | TC-GROUP-002 | FR 4.1 | Join savings group | Add `U-10` twice to `G-104` | Member is added once; duplicate does not persist | Matched | PASS |
@@ -92,13 +93,13 @@ The command builds the backend, runs all `*.test.ts` files, and writes text and 
 
 ### Local run
 
-Latest local run after commit `f956d0b`: **31 passed, 0 failed**. TypeScript compilation passed as part of `npm test`. Coverage: 66.02% statements/lines, 85.87% branches, 68.30% functions overall.
+Latest local run after commit `e621e28`: **32 passed, 0 failed**. TypeScript compilation passed as part of `npm test`. Coverage: 69.83% statements/lines, 85.22% branches, 73.21% functions overall.
 
 | Coverage scope | Statements / lines | Branches | Functions |
 | --- | ---: | ---: | ---: |
-| All instrumented backend files | 66.02% | 85.87% | 68.30% |
-| `services.ts` | 83.02% | 91.61% | 81.81% |
-| `controller.ts` | 49.23% | 74.54% | 30.35% |
+| All instrumented backend files | 69.83% | 85.22% | 73.21% |
+| `services.ts` | 85.82% | 90.85% | 87.01% |
+| `controller.ts` | 54.07% | 76.11% | 37.50% |
 
 Coverage includes the controller file because account and authentication scenarios exercise it. Several controller routes remain outside these unit scenarios; the overall percentage should not be read as complete application or end-to-end coverage.
 
