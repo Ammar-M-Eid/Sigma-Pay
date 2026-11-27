@@ -18,12 +18,24 @@ const ReportsPage: React.FC<ReportsPageProps> = ({ userId }) => {
     setLoading(false);
   };
 
-  const exportCsv = async () => {
-    const result = await apiClient.exportReport(userId, reportType, startDate || undefined, endDate || undefined);
-    if (!result.ok) { setMessage('Report export is unavailable. Generate a report after recording activity.'); return; }
-    const url = URL.createObjectURL(await result.blob());
-    const link = document.createElement('a'); link.href = url; link.download = `sigmapay-${reportType}-report.csv`; link.click(); URL.revokeObjectURL(url);
-    setMessage('CSV report downloaded.');
+  const download = async (format: 'csv' | 'pdf') => {
+    setMessage('');
+    try {
+      const request = format === 'pdf' ? apiClient.exportReportPdf : apiClient.exportReport;
+      const result = await request.call(apiClient, userId, reportType, startDate || undefined, endDate || undefined);
+      if (!result.ok) { setMessage(`Could not export the ${format.toUpperCase()} report. Check your date range and try again.`); return; }
+      const url = URL.createObjectURL(await result.blob());
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `sigmapay-${reportType}-report.${format}`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 0);
+      setMessage(`${format.toUpperCase()} report downloaded.`);
+    } catch {
+      setMessage(`Could not export the ${format.toUpperCase()} report. Check your connection and try again.`);
+    }
   };
 
   return <div className="workflow-page">
@@ -33,7 +45,7 @@ const ReportsPage: React.FC<ReportsPageProps> = ({ userId }) => {
       <button className={`report-option ${reportType === 'income' ? 'is-selected' : ''}`} type="button" onClick={() => generate('income')}><span className="eyebrow">02 / CASH FLOW</span><strong>Income statement</strong><small>Income, expense totals and net amount.</small></button>
       <button className={`report-option ${reportType === 'spending' ? 'is-selected' : ''}`} type="button" onClick={() => generate('spending')}><span className="eyebrow">03 / CATEGORIES</span><strong>Spending report</strong><small>Recorded expenses grouped by category.</small></button>
     </div>
-    <section className="workflow-panel report-result"><div className="panel-heading"><span className="eyebrow">CUSTOM REPORT</span><h2>Select a date range</h2></div><div className="form-two-column report-date-range"><label>From<input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} /></label><label>Through<input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} /></label></div><div className="report-actions"><button className="button-primary" type="button" disabled={loading || (!!startDate && !!endDate && startDate > endDate)} onClick={() => generate(reportType)}>{loading ? 'Generating…' : 'Generate selected report'}</button><button className="button-outline" type="button" onClick={exportCsv} disabled={!report || loading}>Export CSV</button></div><div className="panel-heading report-subheading"><span className="eyebrow">{report ? reportType.toUpperCase() : 'READY WHEN YOU ARE'}</span><h2>{report ? (reportType === 'monthly' ? 'Activity summary' : reportType === 'income' ? 'Income statement' : 'Spending by category') : 'Report preview'}</h2></div>{loading ? <p>Building your report…</p> : report ? <pre className="report-output">{report}</pre> : <div className="empty-state"><strong>Your report will appear here</strong><p>Add activity in Budgets to see it included in your report.</p></div>}{message && <p className="inline-message" role="status">{message}</p>}</section>
+    <section className="workflow-panel report-result"><div className="panel-heading"><span className="eyebrow">CUSTOM REPORT</span><h2>Select a date range</h2></div><div className="form-two-column report-date-range"><label>From<input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} /></label><label>Through<input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} /></label></div><div className="report-actions"><button className="button-primary" type="button" disabled={loading || (!!startDate && !!endDate && startDate > endDate)} onClick={() => generate(reportType)}>{loading ? 'Generating…' : 'Generate selected report'}</button><button className="button-outline" type="button" onClick={() => void download('csv')} disabled={!report || loading}>Export CSV</button><button className="button-outline" type="button" onClick={() => void download('pdf')} disabled={!report || loading}>Export PDF</button></div><div className="panel-heading report-subheading"><span className="eyebrow">{report ? reportType.toUpperCase() : 'READY WHEN YOU ARE'}</span><h2>{report ? (reportType === 'monthly' ? 'Activity summary' : reportType === 'income' ? 'Income statement' : 'Spending by category') : 'Report preview'}</h2></div>{loading ? <p>Building your report…</p> : report ? <pre className="report-output">{report}</pre> : <div className="empty-state"><strong>Your report will appear here</strong><p>Add activity in Budgets to see it included in your report.</p></div>}{message && <p className="inline-message" role="status">{message}</p>}</section>
   </div>;
 };
 

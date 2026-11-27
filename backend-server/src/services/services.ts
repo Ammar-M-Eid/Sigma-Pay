@@ -397,8 +397,96 @@ export class ReportingService implements IReportingService {
   }
 
   exportToPDF(report: IReport): Buffer {
-    // Mock PDF export
-    return Buffer.from(report.content);
+    const safeText = (value: string) => value
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[\u2018\u2019]/g, "'")
+      .replace(/[\u201c\u201d]/g, '"')
+      .replace(/[\u2013\u2014]/g, '-')
+      .replace(/\u2026/g, '...')
+      .replace(/[^\x20-\x7e]/g, '?');
+    const escapePdfString = (value: string) => safeText(value)
+      .replace(/\\/g, '\\\\')
+      .replace(/\(/g, '\\(')
+      .replace(/\)/g, '\\)');
+    const wrapLine = (line: string, width = 92): string[] => {
+      const words = safeText(line).trim().split(/\s+/).filter(Boolean);
+      if (words.length === 0) return [''];
+      const wrapped: string[] = [];
+      let current = '';
+      for (const word of words) {
+        if (word.length > width) {
+          if (current) wrapped.push(current);
+          current = '';
+          for (let offset = 0; offset < word.length; offset += width) wrapped.push(word.slice(offset, offset + width));
+          continue;
+        }
+        const candidate = current ? `${current} ${word}` : word;
+        if (candidate.length > width) {
+          wrapped.push(current);
+          current = word;
+        } else current = candidate;
+      }
+      if (current) wrapped.push(current);
+      return wrapped;
+    };
+
+    const reportLines = report.content.split(/\r?\n/).flatMap((line) => wrapLine(line));
+    const firstPageCapacity = 41;
+    const pageCount = reportLines.length <= firstPageCapacity
+      ? 1
+      : 1 + Math.ceil((reportLines.length - firstPageCapacity) / 44);
+    const pages: string[][] = [];
+    let cursor = 0;
+    for (let pageIndex = 0; pageIndex < pageCount; pageIndex += 1) {
+      const header = pageIndex === 0
+        ? [
+          'SigmaPay Financial Report',
+          `Report type: ${report.reportType}`,
+          `Account: ${report.userId}`,
+          `Generated at: ${report.generatedAt}`,
+          '----------------------------------------------------------------',
+        ]
+        : ['SigmaPay Financial Report (continued)', '----------------------------------------------------------------'];
+      const capacity = pageCapacity - header.length - 1;
+      const body = reportLines.slice(cursor, cursor + capacity);
+      cursor += body.length;
+      pages.push([...header, ...body, `Page ${pageIndex + 1} of ${pageCount}`]);
+    }
+
+    const objects: string[] = [
+      '<< /Type /Catalog /Pages 2 0 R >>',
+      `<< /Type /Pages /Kids [${pages.map((_, index) => `${4 + index * 2} 0 R`).join(' ')}] /Count ${pages.length} >>`,
+      '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+    ];
+    pages.forEach((lines, index) => {
+      const pageObjectId = 4 + index * 2;
+      const contentObjectId = pageObjectId + 1;
+      const commands = ['BT'];
+      let y = 790;
+      lines.forEach((line, lineIndex) => {
+        if (lineIndex === 0 && index === 0) commands.push('/F1 16 Tf');
+        else commands.push('/F1 10 Tf');
+        commands.push(`1 0 0 1 50 ${y} Tm (${escapePdfString(line)}) Tj`);
+        y -= 15;
+      });
+      commands.push('ET');
+      const stream = commands.join('\n');
+      objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents ${contentObjectId} 0 R >>`);
+      objects.push(`<< /Length ${Buffer.byteLength(stream, 'ascii')} >>\nstream\n${stream}\nendstream`);
+    });
+
+    let pdf = '%PDF-1.4\n';
+    const offsets = [0];
+    objects.forEach((object, index) => {
+      offsets.push(Buffer.byteLength(pdf, 'ascii'));
+      pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
+    });
+    const xrefOffset = Buffer.byteLength(pdf, 'ascii');
+    pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+    offsets.slice(1).forEach((offset) => { pdf += `${String(offset).padStart(10, '0')} 00000 n \n`; });
+    pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`;
+    return Buffer.from(pdf, 'ascii');
   }
 }
 

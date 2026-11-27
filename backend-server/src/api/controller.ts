@@ -381,9 +381,9 @@ export class Controller {
     return this.reportingService.generateReport({ userId, startDate, endDate }, reportType);
   }
 
-  ctlExportToPDF(reportType: string): boolean {
-    // Mock implementation
-    return true;
+  ctlExportToPDF(userId: string, reportType: string, startDate?: string, endDate?: string): Buffer | null {
+    const report = this.reportingService.generateReport({ userId, startDate, endDate }, reportType);
+    return report ? this.reportingService.exportToPDF(report) : null;
   }
 
   // IControllerPayments methods
@@ -676,6 +676,20 @@ export function createApiRouter(controller: Controller): Router {
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', `attachment; filename=sigmapay-${type}-report.csv`);
     res.send(`"${type} report","Generated"\n"${content.replace(/"/g, '""').replace(/\n/g, ' | ')}","${new Date().toISOString()}"\n`);
+  });
+  router.get('/reports/:userId/export/pdf', (req: Request, res: Response) => {
+    const type = ['income', 'spending'].includes(String(req.query.type)) ? String(req.query.type) : 'monthly';
+    const startDate = typeof req.query.startDate === 'string' ? req.query.startDate : undefined;
+    const endDate = typeof req.query.endDate === 'string' ? req.query.endDate : undefined;
+    if ((startDate && !Number.isFinite(Date.parse(startDate))) || (endDate && !Number.isFinite(Date.parse(endDate))) || (startDate && endDate && Date.parse(startDate) > Date.parse(endDate))) {
+      res.status(400).json({ success: false, message: 'Choose a valid report date range.' });
+      return;
+    }
+    const pdf = controller.ctlExportToPDF(req.params.userId, type, startDate, endDate);
+    if (!pdf) { res.status(400).json({ success: false, message: 'Report could not be created.' }); return; }
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=sigmapay-${type}-report.pdf`);
+    res.send(pdf);
   });
 
   // Payment endpoints
