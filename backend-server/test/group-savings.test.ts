@@ -64,3 +64,19 @@ test('TC-GROUP-004 reports group targets, member contributions and handles an un
   assert.equal(service.generateGroupReport('missing'), 'Group not found');
 });
 
+test('TC-GROUP-006 records only member withdrawal requests within their contributed share', () => {
+  const { service, groups } = fixture();
+  const group = sampleGroup();
+  group.contributions = new Map([['U-7', 600], ['U-9', 300]]);
+  service.createGroup(group);
+
+  assert.equal(service.requestWithdrawal('G-104', 'U-7', 400), true);
+  assert.equal(group.withdrawalRequests?.[0].status, 'Pending');
+  assert.equal(service.requestWithdrawal('G-104', 'U-7', 300), false);
+  assert.equal(service.requestWithdrawal('G-104', 'U-88', 100), false);
+  assert.equal(service.requestWithdrawal('G-104', 'U-9', -1), false);
+  assert.equal(service.requestWithdrawal('missing', 'U-7', 100), false);
+  assert.equal(group.withdrawalRequests?.length, 1);
+  assert.equal(groups.get('G-104')?.currentAmount.amount, 2400);
+});
+
