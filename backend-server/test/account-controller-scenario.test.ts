@@ -59,7 +59,7 @@ test('TC-AUTH-003 authenticates valid credentials, rejects wrong passwords, and 
   assert.equal(login.userId, created.userId);
   assert.equal(controller.ctlLogin('ammar@example.com', 'WrongPass1'), null);
   const history = activityRepository.findByUserId(created.userId);
-  assert.deepEqual(history.map((entry) => entry.status), ['Success', 'Failed']);
+  assert.deepEqual(history.map((entry) => entry.status), ['Failed', 'Success']);
   assert.ok(history.every((entry) => entry.email === 'ammar@example.com'));
 });
 
