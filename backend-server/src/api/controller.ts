@@ -363,6 +363,10 @@ export class Controller {
     }
   }
 
+  ctlRequestGroupWithdrawal(groupId: string, memberId: string, amount: number): boolean {
+    return this.groupSavingsService.requestWithdrawal(groupId, memberId, amount);
+  }
+
   ctlGenerateGroupReport(groupId: string): string {
     return this.groupSavingsService.generateGroupReport(groupId);
   }
@@ -645,6 +649,11 @@ export function createApiRouter(controller: Controller): Router {
     const { memberId, amount } = req.body;
     const result = controller.ctlProcessDeposit(groupId, memberId, amount);
     res.json({ success: result });
+  });
+
+  router.post('/groups/:groupId/withdrawals', (req: Request, res: Response) => {
+    const success = controller.ctlRequestGroupWithdrawal(req.params.groupId, req.body.memberId, Number(req.body.amount));
+    res.status(success ? 202 : 400).json({ success, status: success ? 'Pending' : undefined, message: success ? 'Withdrawal request recorded for review.' : 'Withdrawal request is invalid or exceeds the member contribution.' });
   });
 
   // Reports endpoints

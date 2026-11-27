@@ -128,6 +128,7 @@ export interface IGroupSavings {
   currentAmount: IMoney;
   members: string[];
   contributions?: Map<string, number>;
+  withdrawalRequests?: Array<{ requestId: string; memberId: string; amount: number; requestedAt: string; status: 'Pending' }>;
 }
 
 export interface ISavingsGroup extends IGroupSavings {

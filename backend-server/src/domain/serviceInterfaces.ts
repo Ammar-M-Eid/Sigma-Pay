@@ -55,6 +55,7 @@ export interface IGroupSavingsService {
   createGroup(group: IGroupSavings): string;
   joinGroup(groupId: string, userId: string): void;
   contribute(groupId: string, userId: string, amount: number): boolean;
+  requestWithdrawal(groupId: string, userId: string, amount: number): boolean;
   generateGroupReport(groupId: string): string;
 }
 

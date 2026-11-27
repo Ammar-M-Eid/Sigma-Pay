@@ -268,6 +268,18 @@ export class GroupSavingsService implements IGroupSavingsService {
     return true;
   }
 
+  requestWithdrawal(groupId: string, userId: string, amount: number): boolean {
+    const group = this.groupSavingsRepository.findById(groupId);
+    if (!group || !group.members.includes(userId) || !Number.isFinite(amount) || amount <= 0) return false;
+    const contributed = group.contributions?.get(userId) ?? 0;
+    const pending = (group.withdrawalRequests ?? []).filter((request) => request.memberId === userId && request.status === 'Pending').reduce((total, request) => total + request.amount, 0);
+    if (amount > contributed - pending) return false;
+    group.withdrawalRequests ??= [];
+    group.withdrawalRequests.push({ requestId: uuidv4(), memberId: userId, amount, requestedAt: new Date().toISOString(), status: 'Pending' });
+    this.groupSavingsRepository.save(group);
+    return true;
+  }
+
   generateGroupReport(groupId: string): string {
     const group = this.groupSavingsRepository.findById(groupId);
     if (group) {
