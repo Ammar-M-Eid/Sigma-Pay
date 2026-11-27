@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { GoalService } from '../src/services/services';
 
-test('contribution completes the goal fixture and verifies repository messages', () => {
+test('TC-GOAL-001 completes a goal at its target and ignores a missing goal', () => {
   const goal = { goalId: 'G-23', userId: 'U-7', goalType: 'Emergency fund', targetAmount: { amount: 5000, currency: { code: 'EGP', symbol: 'E£', exchangeRate: 1 } }, currentAmount: { amount: 4500, currency: { code: 'EGP', symbol: 'E£', exchangeRate: 1 } }, deadline: '2026-12-31', priorityLevel: 'High', state: 'Active' };
   const calls = [];
   const repository = { findById(id) { calls.push(['findById', id]); return id === goal.goalId ? goal : null; }, save(value) { calls.push(['save', value.goalId, value.state]); return value.goalId; }, findByUserId() { return [goal]; } };

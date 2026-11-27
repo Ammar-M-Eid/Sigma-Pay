@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { NotificationServiceBL } from '../src/services/services';
 
-test('sends an alert through the repository with an unread fixture', () => {
+test('TC-NOTIFY-001 stores a new alert as unread and returns it to its owner', () => {
   const saved = [];
   const calls = [];
   const repository = { save(item) { calls.push(['save', item.userId]); saved.push(item); return item.notificationId; }, findByUserId(id) { calls.push(['findByUserId', id]); return saved.filter((item) => item.userId === id); }, findById() { return null; } };

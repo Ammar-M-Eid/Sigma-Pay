@@ -17,7 +17,7 @@ function sampleGroup() {
   return { groupId: 'G-104', groupName: 'Family trip', targetAmount: { amount: 12000, currency }, currentAmount: { amount: 2400, currency }, members: ['U-7', 'U-9'] };
 }
 
-test('creates a group and persists it', () => {
+test('TC-GROUP-001 creates a savings group and persists it', () => {
   const { service, calls, groups } = fixture();
   const group = sampleGroup();
   assert.equal(service.createGroup(group), 'G-104');
@@ -25,7 +25,7 @@ test('creates a group and persists it', () => {
   assert.deepEqual(calls, [['save', 'G-104']]);
 });
 
-test('joining a group adds a member once and verifies repository calls', () => {
+test('TC-GROUP-002 joins a member once and avoids duplicate membership', () => {
   const { service, calls } = fixture();
   const group = sampleGroup();
   service.createGroup(group);
@@ -38,7 +38,7 @@ test('joining a group adds a member once and verifies repository calls', () => {
   assert.deepEqual(calls, [['findById', 'G-104']]);
 });
 
-test('contributes to a known group and leaves an unknown group unchanged', () => {
+test('TC-GROUP-003 records a contribution for a known group only', () => {
   const { service, calls } = fixture();
   const group = sampleGroup();
   service.createGroup(group);
@@ -52,7 +52,7 @@ test('contributes to a known group and leaves an unknown group unchanged', () =>
   assert.equal(group.currentAmount.amount, 2900);
 });
 
-test('reports a group snapshot and returns a not found result for an invalid id', () => {
+test('TC-GROUP-004 reports group totals and handles an unknown group', () => {
   const { service } = fixture();
   service.createGroup(sampleGroup());
   assert.equal(service.generateGroupReport('G-104'), 'Group: Family trip\nTarget: 12000 EGP\nCurrent: 2400 EGP\nMembers: 2');

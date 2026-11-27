@@ -24,7 +24,7 @@ function payment(id, state = 'Pending') {
   };
 }
 
-test('allows Pending to Completed to Refunded and rejects repeated processing and refund', () => {
+test('TC-PAY-001 processes a pending payment and refunds it once', () => {
   const { service, payments, calls } = fixture();
   const current = payment('p-1');
   payments.set(current.paymentId, current);
@@ -38,7 +38,7 @@ test('allows Pending to Completed to Refunded and rejects repeated processing an
   assert.deepEqual(calls, [['save', 'p-1'], ['findById', 'p-1'], ['save', 'p-1'], ['findById', 'p-1']]);
 });
 
-test('allows Pending to Scheduled to Cancelled and rejects invalid repeats', () => {
+test('TC-PAY-002 schedules and cancels a recurring payment once', () => {
   const { service, payments, calls } = fixture();
   const current = payment('p-2');
   payments.set(current.paymentId, current);
@@ -54,14 +54,14 @@ test('allows Pending to Scheduled to Cancelled and rejects invalid repeats', () 
   assert.deepEqual(calls, [['save', 'p-2'], ['findById', 'p-2'], ['save', 'p-2'], ['findById', 'p-2'], ['findById', 'p-2']]);
 });
 
-test('does not transition or persist a missing payment', () => {
+test('TC-PAY-003 does not change or save a payment that is missing', () => {
   const { service, calls } = fixture();
   assert.equal(service.cancelPayment('missing'), false);
   assert.deepEqual(service.refundPayment('missing'), { success: false, message: 'Payment not found' });
   assert.deepEqual(calls, [['findById', 'missing'], ['findById', 'missing']]);
 });
 
-test('rejects every payment operation that is invalid for each modeled state', () => {
+test('TC-PAY-004 rejects invalid payment transitions for every modeled state', () => {
   const states = ['Pending', 'Scheduled', 'Completed', 'Cancelled', 'Refunded'];
   const operations = [
     { name: 'process', allowedFrom: 'Pending', run: (service, current) => service.processPayment(current) },

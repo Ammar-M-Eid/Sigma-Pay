@@ -4,7 +4,7 @@ import express from 'express';
 import { createServer } from 'node:http';
 import { createFeatureHubRouter } from '../src/api/featureHub';
 
-test('stores a valid illustrative strategy and rejects unknown options', async (t) => {
+test('TC-INVEST-001 stores an allowed investment strategy and rejects unknown options', async (t) => {
   const app = express();
   app.use(express.json());
   const calls = [];
