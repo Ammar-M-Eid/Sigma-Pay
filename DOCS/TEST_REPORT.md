@@ -13,7 +13,7 @@ Acceptance criteria are tied to the final proposal's proposed service owners. Ow
 | Goals | FR 3.1 | Contributions update progress, complete at target, and missing goal IDs do not mutate data. | TC-GOAL-001 | Omar Ali Abdelhafiz Morsi |
 | Group savings | FR 4.1-4.4 | Group creation with target, unique membership, per-member valid contribution balance and report totals behave correctly. | TC-GROUP-001-006 | Omar Ali Abdelhafiz Morsi |
 | Bills and payments | FR 9.1-9.3 | Local bill/payment transitions, owner isolation, scheduling and invalid transition rejection work. | TC-BILL-001-003, TC-PAY-001-004 | Ammar Mahmoud Eid Ahmed |
-| Reporting and analytics | FR 7.1-7.2 | User/date filters and totals are correct; PDF is valid, paginated and downloadable; invalid ranges are rejected. | TC-REPORT-001-007 | Mohammed Eslam Saad Abdelhakeem |
+| Reporting and analytics | FR 7.1-7.2 | User/date filters and totals are correct; PDF is valid, paginated and downloadable; period comparisons return accurate spend deltas; invalid ranges are rejected. | TC-REPORT-001-008 | Mohammed Eslam Saad Abdelhakeem |
 | Notifications | FR 3.2 (local alert storage only) | New alerts are saved unread and returned only to the owning user. | TC-NOTIFY-001 | Mohamed Ibrahim Mohamed Aly |
 | Learning resources and quizzes | FR 11.1-11.4 | Resources are listed, quizzes are validated/graded, and missed topics produce user-scoped learning recommendations. | TC-LEARN-001 | Andrew Gamal Moris Shokr |
 | Investment preferences | FR 5.2-5.3 (strategy preference only) | Allowed preferences persist; unsupported values are rejected without a write. | TC-INVEST-001 | Andrew Gamal Moris Shokr |
@@ -30,7 +30,7 @@ Acceptance criteria are tied to the final proposal's proposed service owners. Ow
 | 4.1 group creation/join; 4.2 contributions; 4.3 analytics | TC-GROUP-001-006 | Partial: group creation, membership, contribution history and totals covered; group expenses and export/chart outputs are not covered. FR 4.5 reminders are not covered; FR 4.6 withdrawal requests are tested for membership and contributed-share limits (TC-GROUP-006). |
 | 5.1 recommendations; 5.2 option selection; 5.3 strategy; 5.4 portfolio; 5.5 reports; 5.6 market alerts | TC-INVEST-001 | Partial: preference persistence only. No live market data, portfolio execution, investment reports or alerts. |
 | 6.1 insights; 6.2 AI assistant; 6.3 human consultations | None | Not covered; no connected advisor provider. |
-| 7.1 customizable reports; 7.2 export; 7.3 comparisons | TC-REPORT-001-007 | Partial: local filtering/totals and PDF export covered; interactive charts and period comparisons not covered. |
+| 7.1 customizable reports; 7.2 export; 7.3 comparisons | TC-REPORT-001-008 | Partial: local filters, totals, PDF export and period spending comparisons covered; interactive charts are not covered. |
 | 8.1 cards; 8.2 controls/monitoring | None | Not covered; no card provider. |
 | 9.1 bills; 9.2 recurring payments; 9.3 transaction security | TC-BILL-001-003, TC-PAY-001-004 | Partial: in-memory lifecycle/ownership rules; no external processor, automatic execution or security audit. |
 | 10.1-10.5 partner offers | None | Not covered. |
@@ -73,6 +73,7 @@ Fixtures use in-memory repositories and local HTTP requests. Expected and actual
 | TC-REPORT-005 | FR 7.2 | PDF structure and safe text output | Parentheses, backslash, newline and Unicode input | Valid xref/object offsets, escaped literal text, sanitized unsupported characters | Matched | PASS |
 | TC-REPORT-006 | FR 7.2 | PDF pagination | 160 long transaction lines | Multiple pages and consistent page tree/page numbering | Matched | PASS |
 | TC-REPORT-007 | FR 7.2 | PDF download endpoint | Spending report range and reversed range | PDF attachment headers/content; invalid range returns 400 | Matched | PASS |
+| TC-REPORT-008 | FR 7.3 | Compare financial periods | Current spend 120; previous spend 100; reversed dates | Change is 20 and 20%; invalid dates return HTTP 400 | Matched | PASS |
 | TC-NOTIFY-001 | FR 3.2 (local alerts) | Send alert | Alert for `U-12` | Alert is persisted as unread and appears in that userâ€™s history | Matched | PASS |
 | TC-INVEST-001 | FR 5.2-5.3 | Investment strategy | Known options, then unknown option | Valid strategy can be saved/read; unknown option returns HTTP 400 without saving | Matched | PASS |
 | TC-LEARN-001 | FR 11.1-11.4 | Quiz and personalized learning path | Resource list; invalid quiz; learner answers [1, 0, 1] | Resource library is available; invalid quiz rejected; score/feedback returned; resources match missed topics and are isolated by learner | Matched | PASS |
@@ -93,13 +94,13 @@ The command builds the backend, runs all `*.test.ts` files, and writes text and 
 
 ### Local run
 
-Latest local run after commit `e621e28`: **32 passed, 0 failed**. TypeScript compilation passed as part of `npm test`. Coverage: 69.83% statements/lines, 85.22% branches, 73.21% functions overall.
+Latest local run after commit `7866e5a`: **33 passed, 0 failed**. TypeScript compilation passed as part of `npm test`. Coverage: 70.27% statements/lines, 85.49% branches, 73.45% functions overall.
 
 | Coverage scope | Statements / lines | Branches | Functions |
 | --- | ---: | ---: | ---: |
-| All instrumented backend files | 69.83% | 85.22% | 73.21% |
-| `services.ts` | 85.82% | 90.85% | 87.01% |
-| `controller.ts` | 54.07% | 76.11% | 37.50% |
+| All instrumented backend files | 70.27% | 85.49% | 73.45% |
+| `services.ts` | 86.25% | 90.86% | 87.17% |
+| `controller.ts` | 54.59% | 77.14% | 38.59% |
 
 Coverage includes the controller file because account and authentication scenarios exercise it. Several controller routes remain outside these unit scenarios; the overall percentage should not be read as complete application or end-to-end coverage.
 
