@@ -40,7 +40,7 @@ export class InMemoryInvestmentStrategyStore implements InvestmentStrategyStore 
   }
 }
 
-const quizAttempts = new Map<string, Array<{ attemptId: string; score: number; total: number; completedAt: string }>>();
+const quizAttempts = new Map<string, Array<{ attemptId: string; score: number; total: number; completedAt: string; recommendedResourceIds: string[] }>>();
 const consultations = new Map<string, Array<{ requestId: string; topic: string; status: 'Provider unavailable'; requestedAt: string }>>();
 
 function isText(value: unknown, maxLength = 240): value is string {
@@ -101,13 +101,21 @@ export function createFeatureHubRouter(strategyStore: InvestmentStrategyStore = 
       return;
     }
     const score = quiz.reduce((total, question, index) => total + (answers[index] === question.correct ? 1 : 0), 0);
-    const result = { attemptId: randomUUID(), score, total: quiz.length, completedAt: new Date().toISOString() };
+    const missedTopics = answers.flatMap((answer: number, index: number) => answer === quiz[index].correct ? [] : [quiz[index].id]);
+    const topicResources: Record<string, string> = { q1: 'budget-basics', q2: 'compound-growth', q3: 'emergency-fund' };
+    const result = { attemptId: randomUUID(), score, total: quiz.length, completedAt: new Date().toISOString(), recommendedResourceIds: missedTopics.map((questionId) => topicResources[questionId]) };
     const history = quizAttempts.get(userId) ?? [];
     history.unshift(result);
     quizAttempts.set(userId, history.slice(0, 50));
     res.json({ success: true, result, feedback: quiz.map((question, index) => ({ questionId: question.id, correct: answers[index] === question.correct, explanation: question.explanation })) });
   });
   router.get('/learning/:userId/history', (req, res) => res.json({ success: true, attempts: quizAttempts.get(req.params.userId) ?? [] }));
+  router.get('/learning/:userId/recommendations', (req, res) => {
+    const latestAttempt = quizAttempts.get(req.params.userId)?.[0];
+    const recommendedIds = latestAttempt?.recommendedResourceIds ?? [];
+    const recommendedResources = resources.filter((resource) => recommendedIds.includes(resource.id));
+    res.json({ success: true, personalized: Boolean(latestAttempt), basedOnAttemptId: latestAttempt?.attemptId ?? null, resources: recommendedResources });
+  });
 
   router.get('/offers', (_req, res) => res.json({ success: true, available: false, offers: [], message: 'Partner offers are unavailable until a partner catalogue is configured.' }));
   router.get('/cards/:userId/activity', (_req, res) => res.json({ success: true, available: false, cards: [], message: 'Card issuance and activity are unavailable until a card provider is configured.' }));
