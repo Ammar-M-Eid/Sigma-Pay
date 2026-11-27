@@ -1,6 +1,6 @@
 # SigmaPay Test Report
 
-This report records the TypeScript service tests, their case identifiers, local results, coverage, and the corresponding GitHub Actions run. The supplied CSE454 test-report document defines the submission format; it does not provide the project’s functional-requirement specification. The requirement areas below therefore describe the implemented behavior under test and do not claim complete coverage of every proposal requirement.
+This report records the TypeScript service tests, case identifiers, local results, coverage, and GitHub Actions evidence. The supplied CSE454 test-report document defines the reporting format. Functional requirements were cross-checked against `A:\CS Study\7th Sem\Advanced\old project docs\Requirments_V1[1].docx` (project SRS) and the SigmaPay final project proposal. This report maps only behaviors supported by these tests; it does not claim complete coverage of every proposal requirement.
 
 ## 1. Requirements under test
 
@@ -13,11 +13,24 @@ This report records the TypeScript service tests, their case identifiers, local 
 | Group savings | Group creation, unique membership, contributions, report totals and unknown-group handling | TC-GROUP-001–004 |
 | Bills | Scheduled creation, owner isolation, one-time payment transition and timestamp | TC-BILL-001–003 |
 | Payments | Pending/completed/refunded and recurring/scheduled/cancelled transitions; invalid and missing operations | TC-PAY-001–004 |
-| Reports | Date and user filtering, spending totals, income summaries, invalid report inputs, current export-buffer contract | TC-REPORT-001–004 |
+| Reports | Date/user filtering, totals, input validation, valid PDF generation, pagination and download | TC-REPORT-001–007 |
 | Notifications | Alert creation, unread default and user-scoped retrieval | TC-NOTIFY-001 |
 | Investment preferences | Allowed strategy persistence and rejection of unknown options | TC-INVEST-001 |
 
-These tests cover service behaviors represented in the current TypeScript implementation. Provider integrations, external email delivery, live payment processing, and persistence across process restarts are not covered because they are not connected in this project.
+### SRS traceability and limits
+
+| SRS requirement area | Test mapping | Coverage status |
+| --- | --- | --- |
+| FR 1.1 registration/authentication and FR 1.7 login activity | TC-AUTH-001–004 | Partial: local registration, credential checks, disabled account and user-scoped activity are tested; production identity provider/session flows are not. |
+| FR 2.2–2.3 expense/budget behavior | TC-BUDGET-001 | Partial: expense and invalid amount path covered; broader budget planning and persistence are not. |
+| FR 3.1 goals | TC-GOAL-001 | Partial: contribution completion and missing goal covered. |
+| FR 4.1–4.4 group savings | TC-GROUP-001–004 | Partial: create, membership uniqueness, contribution total and report covered; per-member contribution histories/withdrawals are not. |
+| FR 5.2–5.3 investment preferences/strategies | TC-INVEST-001 | Partial: local strategy choice validation only; no live advisor or market execution. |
+| FR 7.1–7.2 financial reports | TC-REPORT-001–007 | Partial: local reports, filtering and PDF download covered; period comparison (FR 7.3) is not. |
+| FR 9.1–9.3 bills/payments and recurring schedules | TC-BILL-001–003, TC-PAY-001–004 | Partial: local state transitions and ownership rules covered; external payment processor and real recurring execution are not connected. |
+| Other SRS areas (including learning resources/quizzes, cards/offers, provider-backed advice, and external notifications) | No direct test case in this suite | Not covered by this test suite. |
+
+The repository uses in-memory repositories in these scenarios. These tests cover service behaviors represented in the current TypeScript implementation; provider integrations, external email delivery, live payment processing, and persistence across process restarts are not covered because they are not connected in this project.
 
 ## 2. Test cases
 
@@ -47,7 +60,10 @@ Fixtures use in-memory repositories and local HTTP requests. Expected and actual
 | TC-REPORT-001 | Date-filtered activity report | November range, two users, one out-of-range transaction | Only matching user and date-range totals included | Matched | PASS |
 | TC-REPORT-002 | Category and income totals | Income, Food and Rent transactions | Spending grouped by category; income statement and monthly summary totals match | Matched | PASS |
 | TC-REPORT-003 | Report input validation | Unsupported type, missing user, invalid and reversed dates | Each invalid request returns null | Matched | PASS |
-| TC-REPORT-004 | Report export adapter | Generated monthly report | Current service returns a Buffer containing report text | Matched | PASS |
+| TC-REPORT-004 | PDF export service | Generated monthly report | Returns PDF Buffer with PDF 1.4 header and EOF marker | Matched | PASS |
+| TC-REPORT-005 | PDF structure and safe text output | Parentheses, backslash, newline and Unicode input | Valid xref/object offsets, escaped literal text, sanitized unsupported characters | Matched | PASS |
+| TC-REPORT-006 | PDF pagination | 160 long transaction lines | Multiple pages and consistent page tree/page numbering | Matched | PASS |
+| TC-REPORT-007 | PDF download endpoint | Spending report range and reversed range | PDF attachment headers/content; invalid range returns 400 | Matched | PASS |
 | TC-NOTIFY-001 | Send alert | Alert for `U-12` | Alert is persisted as unread and appears in that user’s history | Matched | PASS |
 | TC-INVEST-001 | Investment strategy | Known options, then unknown option | Valid strategy can be saved/read; unknown option returns HTTP 400 without saving | Matched | PASS |
 
@@ -67,20 +83,20 @@ The command builds the backend, runs all `*.test.ts` files, and writes text and 
 
 ### Local run
 
-Latest local run: **25 passed, 0 failed**. TypeScript backend build completed successfully.
+Latest local run after commit `26ab896`: **28 passed, 0 failed**. TypeScript compilation passed as part of `npm test`.
 
 | Coverage scope | Statements / lines | Branches | Functions |
 | --- | ---: | ---: | ---: |
-| All instrumented backend files | 52.59% | 86.98% | 63.96% |
-| `services.ts` | 80.13% | 92.91% | 81.57% |
-| `controller.ts` | 27.23% | 82.35% | 20.00% |
+| All instrumented backend files | 62.77% | 86.42% | 65.31% |
+| `services.ts` | 82.53% | 92.61% | 81.57% |
+| `controller.ts` | 45.60% | 77.77% | 25.45% |
 
 Coverage includes the controller file because account and authentication scenarios exercise it. Several controller routes remain outside these unit scenarios; the overall percentage should not be read as complete application or end-to-end coverage.
 
-`TC-REPORT-004` verifies only the current `exportToPDF` adapter contract: the implementation returns report text in a `Buffer`. It does not establish that the output is a standards-compliant PDF. The feature hub and other providers are tested only for their currently implemented local behavior, not live external integrations.
+PDF checks verify the generated file header, object offsets and cross-reference table, escaping/sanitization, multi-page structure, and the HTTP attachment response. These checks do not cover rendering compatibility in every PDF viewer. Coverage percentages are measured across all instrumented backend files; a passing suite does not imply full SRS coverage.
 
 ### GitHub Actions
 
-The hosted `validate` job passed for commit `f651433`: backend tests and coverage generation, frontend production build, and container image builds all succeeded. The backend coverage artifact is attached to [GitHub Actions run #26](https://github.com/Ammar-M-Eid/Sigma-Pay/actions/runs/45972127399).
+The hosted `validate` job passed for commit `f651433`: backend tests and coverage generation, frontend production build, and container image builds all succeeded. The backend coverage artifact is attached to [GitHub Actions run #26](https://github.com/Ammar-M-Eid/Sigma-Pay/actions/runs/45972127399). This is historical evidence; the new commit `26ab896` has a fresh run pending.
 
-The separate SonarQube quality-gate job failed after the scan because its quality-gate API request returned HTTP 403. This does not change the successful test/build validation result; the SonarQube gate remains unsuccessful for that run.
+The SonarQube quality-gate job on the earlier run failed after scanning because the quality-gate API returned HTTP 403. This historical result is not evidence of the current commit’s gate status.
