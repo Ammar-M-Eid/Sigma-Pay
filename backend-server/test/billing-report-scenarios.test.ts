@@ -88,13 +88,14 @@ test('TC-REPORT-003 rejects unsupported report types, missing account ids, and i
   assert.equal(service.generateReport({ userId: 'U-1', startDate: '2026-12-01', endDate: '2026-11-01' }, 'monthly'), null);
 });
 
-test('TC-REPORT-004 exports the generated report content as a Buffer', () => {
+test('TC-REPORT-004 exports the generated report as a valid PDF Buffer', () => {
   const service = new ReportingService(new TransactionRepositoryImpl());
   const report = service.generateReport({ userId: 'U-1' }, 'monthly');
   assert.ok(report);
   const pdf = service.exportToPDF(report);
   assert.ok(Buffer.isBuffer(pdf));
-  assert.equal(pdf.toString(), report.content);
+  assert.ok(pdf.toString('ascii').startsWith('%PDF-1.4\n'));
+  assert.ok(pdf.toString('ascii').endsWith('%%EOF\n'));
 });
 
 test('TC-AUTH-001 stores login activity and returns history for only the requested user', () => {

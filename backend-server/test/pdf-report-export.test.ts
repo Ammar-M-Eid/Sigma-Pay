@@ -58,7 +58,7 @@ test('TC-REPORT-005 generates a valid single-page PDF and escapes report text sa
 
   assert.match(source, /\/Type \/Catalog/);
   assert.match(source, /\/MediaBox \[0 0 595 842\]/);
-  assert.match(source, /\(Activity \\(November\\)\\\\West\) Tj/);
+  assert.ok(source.includes('(Activity \\(November\\)\\\\West) Tj'));
   assert.match(source, /\(Cafe - paid\) Tj/);
   assert.match(source, /Page 1 of 1/);
 });
