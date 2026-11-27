@@ -260,7 +260,9 @@ export class GroupSavingsService implements IGroupSavingsService {
 
   contribute(groupId: string, userId: string, amount: number): void {
     const group = this.groupSavingsRepository.findById(groupId);
-    if (group) {
+    if (group && group.members.includes(userId) && Number.isFinite(amount) && amount > 0) {
+      group.contributions ??= {};
+      group.contributions[userId] = (group.contributions[userId] ?? 0) + amount;
       group.currentAmount.amount += amount;
       this.groupSavingsRepository.save(group);
     }
@@ -269,7 +271,8 @@ export class GroupSavingsService implements IGroupSavingsService {
   generateGroupReport(groupId: string): string {
     const group = this.groupSavingsRepository.findById(groupId);
     if (group) {
-      return `Group: ${group.groupName}\nTarget: ${group.targetAmount.amount} ${group.targetAmount.currency.code}\nCurrent: ${group.currentAmount.amount} ${group.currentAmount.currency.code}\nMembers: ${group.members.length}`;
+      const contributions = Object.entries(group.contributions ?? {}).map(([memberId, amount]) => `${memberId}: ${amount} ${group.currentAmount.currency.code}`).join('\n') || 'No member contributions recorded';
+      return `Group: ${group.groupName}\nTarget: ${group.targetAmount.amount} ${group.targetAmount.currency.code}\nCurrent: ${group.currentAmount.amount} ${group.currentAmount.currency.code}\nMembers: ${group.members.length}\nContributions:\n${contributions}`;
     }
     return 'Group not found';
   }

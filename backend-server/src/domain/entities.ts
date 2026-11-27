@@ -127,6 +127,7 @@ export interface IGroupSavings {
   targetAmount: IMoney;
   currentAmount: IMoney;
   members: string[];
+  contributions?: Record<string, number>;
 }
 
 export interface ISavingsGroup extends IGroupSavings {

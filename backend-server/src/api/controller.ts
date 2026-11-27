@@ -329,12 +329,12 @@ export class Controller {
   }
 
   // IControllerGroupSavings methods
-  ctlCreateGroup(groupName: string, members: string[]): IGroupSavings | null {
+  ctlCreateGroup(groupName: string, members: string[], targetAmount = 0): IGroupSavings | null {
     try {
       const group: IGroupSavings = {
         groupId: uuidv4(),
         groupName,
-        targetAmount: { amount: 0, currency: { code: 'USD', symbol: '$', exchangeRate: 1 } },
+        targetAmount: { amount: Number.isFinite(targetAmount) && targetAmount >= 0 ? targetAmount : 0, currency: { code: 'USD', symbol: '$', exchangeRate: 1 } },
         currentAmount: { amount: 0, currency: { code: 'USD', symbol: '$', exchangeRate: 1 } },
         members,
       };
@@ -632,8 +632,12 @@ export function createApiRouter(controller: Controller): Router {
 
   // Group Savings endpoints
   router.post('/groups/create', (req: Request, res: Response) => {
-    const { groupName, members } = req.body;
-    const group = controller.ctlCreateGroup(groupName, members);
+    const { groupName, members, targetAmount = 0 } = req.body;
+    if (typeof groupName !== 'string' || !groupName.trim() || !Array.isArray(members) || !Number.isFinite(Number(targetAmount)) || Number(targetAmount) < 0) {
+      res.status(400).json({ success: false, message: 'Provide a group name, member list, and non-negative savings target.' });
+      return;
+    }
+    const group = controller.ctlCreateGroup(groupName, members, Number(targetAmount));
     res.json({ success: !!group, group });
   });
 
