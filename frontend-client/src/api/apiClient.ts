@@ -60,9 +60,6 @@ class ApiClient {
     return this.request('/accounts/login', 'POST', { email, password, verificationCode });
   }
 
-  async demoLogin() {
-    return this.request('/accounts/demo-login', 'POST', {});
-  }
 
   async getAccount(userId: string) {
     return this.request(`/accounts/${userId}`, 'GET');

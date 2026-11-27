@@ -1,68 +1,23 @@
 import React from 'react';
-import { ArrowDownRight, ArrowUpRight, ChartLineUp, CirclesThreePlus, Compass, CreditCard, Receipt, Target, Wallet } from '@phosphor-icons/react';
-import FinanceVector from '../components/FinanceVector';
+import { ArrowRight, ArrowUpRight, Wallet, Target, Receipt, ChartLineUp, CreditCard, UsersThree, Sparkle, ShieldCheck } from '@phosphor-icons/react';
 import { Page } from '../components/Header';
 
-interface OverviewPageProps {
-  onNavigate: (page: Page) => void;
-}
-
-const journeys: Array<{ page: Page; title: string; text: string; icon: React.ElementType; className: string }> = [
-  { page: 'budgets', title: 'Plan a month', text: 'Set limits by category and keep spending in view.', icon: Wallet, className: 'journey-plan' },
-  { page: 'goals', title: 'Build a goal', text: 'Choose a target and track each contribution.', icon: Target, className: 'journey-goal' },
-  { page: 'bills', title: 'Stay ahead of bills', text: 'Keep due dates and repeat schedules together.', icon: Receipt, className: 'journey-bills' },
+interface Props { onNavigate: (page: Page) => void; }
+const shortcuts: Array<{ page: Page; title: string; detail: string; icon: React.ElementType; tint: string }> = [
+  { page: 'budgets', title: 'Set a budget', detail: 'Give your monthly spending a plan.', icon: Wallet, tint: 'mint' },
+  { page: 'goals', title: 'Create a savings goal', detail: 'Make a target and track progress.', icon: Target, tint: 'blue' },
+  { page: 'bills', title: 'Organize your bills', detail: 'Keep due dates in one place.', icon: Receipt, tint: 'amber' },
 ];
+const OverviewPage: React.FC<Props> = ({ onNavigate }) => <div className="overview-page">
+  <section className="welcome-panel">
+    <div className="welcome-content"><span className="welcome-eyebrow"><span className="eyebrow-dot" /> YOUR FINANCIAL HOME</span><h1>Make room for<br /><span>what matters.</span></h1><p>A clear place to plan your spending, build savings, and stay ahead of the month.</p><div className="hero-actions"><button className="button-primary" type="button" onClick={() => onNavigate('budgets')}>Start with a budget <ArrowRight size={17} weight="bold" /></button><button className="button-text" type="button" onClick={() => onNavigate('reports')}>View reports <ArrowUpRight size={16} /></button></div></div>
+    <div className="welcome-art" aria-hidden="true"><div className="art-backdrop"/><div className="art-card art-card-main"><div className="art-card-top"><span className="art-card-logo">S</span><span className="art-card-dots">••••</span></div><div className="art-line art-line-long"/><div className="art-line art-line-short"/><div className="art-card-bottom"><span>YOUR PLAN</span><span className="art-card-symbol">↗</span></div></div><div className="art-float art-float-a"><span className="art-float-icon"><ChartLineUp size={17}/></span><span><b>Small steps</b><small>add up over time</small></span></div><div className="art-float art-float-b"><span className="art-sparkle"><Sparkle size={18} weight="fill"/></span></div><div className="art-ring"/></div>
+    <span className="welcome-watermark" aria-hidden="true">SP</span>
+  </section>
 
-const OverviewPage: React.FC<OverviewPageProps> = ({ onNavigate }) => (
-  <div className="overview-page">
-    <section className="overview-hero" aria-labelledby="welcome-title">
-      <div className="overview-copy">
-        <span className="overview-kicker"><span className="live-pulse" /> Your local money workspace</span>
-        <h1 id="welcome-title" className="heading-1">See the whole picture.<br /><span>Choose your next move.</span></h1>
-        <p>Plan what matters, stay on top of everyday spending and make progress toward the things you care about.</p>
-        <div className="hero-actions">
-          <button className="button-primary" type="button" onClick={() => onNavigate('budgets')}><Wallet size={17} weight="fill" /> Open your budget</button>
-          <button className="button-secondary" type="button" onClick={() => onNavigate('reports')}>Explore your activity <ArrowDownRight size={17} /></button>
-        </div>
-        <div className="overview-trust"><span><i className="trust-check">✓</i> Demo data only</span><span><i className="trust-check">✓</i> No real payments</span></div>
-      </div>
-      <div className="overview-art">
-        <FinanceVector kind="overview" title="Money flows from income to a budget, a savings goal, and bills" />
-      </div>
-      <div className="hero-index" aria-hidden="true"><span>01</span><i /></div>
-    </section>
+  <section className="overview-section" aria-labelledby="quick-start-title"><div className="section-heading"><div><span className="section-kicker">A GOOD PLACE TO BEGIN</span><h2 id="quick-start-title">What would you like to do?</h2></div><button className="section-link" type="button" onClick={() => onNavigate('features')}>Explore all tools <ArrowRight size={16}/></button></div><div className="quick-grid">{shortcuts.map(({page,title,detail,icon:Icon,tint}, index) => <button key={page} type="button" className="quick-card" onClick={() => onNavigate(page)}><span className={`quick-icon ${tint}`}><Icon size={21} weight="duotone"/></span><span className="quick-number">0{index + 1}</span><strong>{title}</strong><small>{detail}</small><span className="quick-arrow"><ArrowUpRight size={17}/></span></button>)}</div></section>
 
-    <section className="workspace-section" aria-labelledby="workspace-heading">
-      <div className="section-title-row">
-        <div><span className="section-kicker">Start where you are</span><h2 id="workspace-heading" className="heading-5">What do you want to work on?</h2></div>
-        <span className="session-tag"><span className="status-dot" /> Local session</span>
-      </div>
-      <div className="journey-grid">
-        {journeys.map(({ page, title, text, icon: Icon, className }) => (
-          <button key={page} className={`journey-card ${className}`} type="button" onClick={() => onNavigate(page)}>
-            <span className="journey-icon"><Icon size={23} weight="duotone" /></span>
-            <span className="journey-copy"><strong>{title}</strong><small>{text}</small></span>
-            <span className="journey-arrow" aria-hidden="true"><ArrowUpRight size={18} /></span>
-          </button>
-        ))}
-      </div>
-    </section>
-
-    <section className="tools-section" aria-labelledby="tools-heading">
-      <div className="section-title-row">
-        <div><span className="section-kicker">Your financial toolkit</span><h2 id="tools-heading">One place for the details</h2></div>
-        <button className="text-link" type="button" onClick={() => onNavigate('features')}>View all tools <ArrowUpRight size={16} /></button>
-      </div>
-      <div className="tool-rail">
-        <button type="button" onClick={() => onNavigate('payments')}><span className="rail-icon rail-blue"><CreditCard size={19} /></span><span><b>Payments</b><small>Simulated checkout</small></span><ArrowUpRight size={16} /></button>
-        <button type="button" onClick={() => onNavigate('reports')}><span className="rail-icon rail-green"><ChartLineUp size={19} /></span><span><b>Reports</b><small>Income & spending</small></span><ArrowUpRight size={16} /></button>
-        <button type="button" onClick={() => onNavigate('groups')}><span className="rail-icon rail-amber"><CirclesThreePlus size={19} /></span><span><b>Group savings</b><small>Shared goals</small></span><ArrowUpRight size={16} /></button>
-        <button type="button" onClick={() => onNavigate('notifications')}><span className="rail-icon rail-lilac"><Compass size={19} /></span><span><b>Alerts</b><small>Local preferences</small></span><ArrowUpRight size={16} /></button>
-      </div>
-    </section>
-
-    <aside className="demo-disclosure"><span className="disclosure-mark">i</span><div><strong>Built for exploring</strong><p>This workspace uses temporary local demo data. Payments, identity checks, email delivery and Supabase storage are not connected.</p></div></aside>
-  </div>
-);
-
+  <section className="overview-bottom-grid"><article className="overview-feature-card"><div className="feature-card-icon"><ChartLineUp size={20}/></div><span className="section-kicker">A CLEARER PICTURE</span><h2>See your money<br/>from every angle.</h2><p>Review activity and understand how your plans are taking shape.</p><button type="button" className="button-secondary" onClick={() => onNavigate('reports')}>Go to reports <ArrowRight size={16}/></button><div className="mini-bars" aria-hidden="true"><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/></div></article><article className="overview-tools-card"><div className="section-heading compact"><div><span className="section-kicker">YOUR TOOLKIT</span><h2>Everything in one place</h2></div><span className="toolkit-mark"><Sparkle size={18}/></span></div><button className="tool-row" onClick={() => onNavigate('groups')}><span className="tool-row-icon mint"><UsersThree size={18}/></span><span><b>Group savings</b><small>Make progress together</small></span><ArrowRight size={17}/></button><button className="tool-row" onClick={() => onNavigate('payments')}><span className="tool-row-icon blue"><CreditCard size={18}/></span><span><b>Payments</b><small>Manage payment activity</small></span><ArrowRight size={17}/></button><button className="tool-row" onClick={() => onNavigate('notifications')}><span className="tool-row-icon amber"><ShieldCheck size={18}/></span><span><b>Preferences</b><small>Choose what you hear about</small></span><ArrowRight size={17}/></button></article></section>
+  <aside className="data-note"><span className="data-note-icon"><ShieldCheck size={19}/></span><div><strong>Your information stays in your workspace</strong><p>Account and planning data is currently held in temporary service storage. Payment processing, identity checks, and email delivery require connected providers.</p></div></aside>
+</div>;
 export default OverviewPage;

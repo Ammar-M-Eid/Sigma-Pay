@@ -31,14 +31,14 @@ const BudgetPage: React.FC<BudgetPageProps> = ({ userId }) => {
     event.preventDefault();
     const parsedCategories = categories.split(',').map((value) => value.trim()).filter(Boolean);
     const result = await apiClient.createBudget(userId, Number(total), start, end, parsedCategories);
-    setMessage(result.success ? 'Budget saved for this demo session.' : result.message || 'Could not create budget.');
+    setMessage(result.success ? 'Budget saved. This information is held in temporary service storage.' : result.message || 'Could not create budget.');
     if (result.success) { setTotal(''); await refresh(); }
   };
 
   const recordExpense = async (event: React.FormEvent) => {
     event.preventDefault();
     const result = await apiClient.recordExpense(userId, Number(expense), category, new Date().toISOString(), 'demo');
-    setMessage(result.success ? 'Expense added to your demo activity.' : result.message || 'Could not record expense. Create a budget first.');
+    setMessage(result.success ? 'Expense added to your activity.' : result.message || 'Could not record expense. Create a budget first.');
     if (result.success) { setExpense(''); await refresh(); }
   };
 
@@ -67,7 +67,7 @@ const BudgetPage: React.FC<BudgetPageProps> = ({ userId }) => {
           <label>Budget amount<input type="number" min="0.01" step="0.01" value={total} onChange={(event) => setTotal(event.target.value)} required placeholder="0.00" /></label>
           <div className="form-two-column"><label>Starts<input type="date" value={start} onChange={(event) => setStart(event.target.value)} required /></label><label>Ends<input type="date" value={end} onChange={(event) => setEnd(event.target.value)} required /></label></div>
           <label>Categories, separated by commas<input value={categories} onChange={(event) => setCategories(event.target.value)} required /></label>
-          <p className="form-disclaimer">Budgets and expense history are temporary and reset when the service restarts.</p>
+          <p className="form-disclaimer">Budgets and expense history are held in temporary service storage and may be cleared when services restart.</p>
           <button className="button-primary" type="submit">Save budget</button>
         </form>
       </section>
@@ -92,3 +92,4 @@ const BudgetPage: React.FC<BudgetPageProps> = ({ userId }) => {
 };
 
 export default BudgetPage;
+

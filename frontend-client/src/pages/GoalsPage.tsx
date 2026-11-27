@@ -50,7 +50,7 @@ const GoalsPage: React.FC<GoalsPageProps> = ({ userId }) => {
   const optimize = async () => {
     const result = await apiClient.getGoalRecommendations(userId, 12, true);
     const text = result.recommendation?.suggestions?.join(' ') || result.message || 'Recommendation unavailable.';
-    setRecommendation(`${text} This is a sample planning suggestion, not a financial forecast.`);
+    setRecommendation(`${text} This is a planning estimate, not a financial forecast.`);
   };
 
   return <div className="workflow-page">
@@ -64,7 +64,7 @@ const GoalsPage: React.FC<GoalsPageProps> = ({ userId }) => {
           <button className="button-primary" type="submit">Create goal</button>
         </form>
       </section>
-      <section className="workflow-panel recommendation-panel"><div className="panel-heading"><span className="eyebrow">PLANNING ASSISTANT</span><h2>Find a steady pace</h2></div><p>Get a sample contribution suggestion based on a 12-month planning window. It does not connect to a bank or predict investment returns.</p><button className="button-outline" type="button" onClick={optimize}>Suggest a plan</button>{recommendation && <p className="inline-message" role="status">{recommendation}</p>}</section>
+      <section className="workflow-panel recommendation-panel"><div className="panel-heading"><span className="eyebrow">PLANNING ASSISTANT</span><h2>Find a steady pace</h2></div><p>Get a contribution suggestion based on a 12-month planning window. It does not connect to a bank or predict investment returns.</p><button className="button-outline" type="button" onClick={optimize}>Suggest a plan</button>{recommendation && <p className="inline-message" role="status">{recommendation}</p>}</section>
     </div>
     <section className="workflow-panel goals-list-panel"><div className="panel-heading panel-heading-row"><div><span className="eyebrow">YOUR PROGRESS</span><h2>Active goals</h2></div><button className="button-quiet" type="button" onClick={refresh}>Refresh</button></div>
       {goals.length === 0 ? <div className="empty-state"><strong>No goals yet</strong><p>Add a goal and make progress with each contribution.</p></div> : <div className="goal-grid">{goals.map((goal) => {
@@ -77,3 +77,4 @@ const GoalsPage: React.FC<GoalsPageProps> = ({ userId }) => {
 };
 
 export default GoalsPage;
+

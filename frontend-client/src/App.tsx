@@ -26,7 +26,10 @@ function readPage(): Page {
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>(readPage);
-  const [userId, setUserId] = useState<string | null>(() => window.localStorage.getItem('sigmapay-user-id') || 'demo-user');
+  const [userId, setUserId] = useState<string | null>(() => {
+    const stored = window.localStorage.getItem('sigmapay-user-id');
+    return stored && stored !== 'demo-user' ? stored : null;
+  });
   useEffect(() => {
     const syncPage = () => setCurrentPage(readPage());
     window.addEventListener('hashchange', syncPage);
@@ -34,28 +37,7 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const motionRoot = document.querySelector<HTMLElement>('#main-content');
-    const revealTargets = motionRoot?.querySelectorAll<HTMLElement>(
-      '.overview-page > section, .overview-page > .demo-disclosure, .workflow-page > .module-heading, .workflow-page > .budget-overview, .workflow-page > .workflow-grid, .workflow-page > .workflow-panel, .workflow-page > .report-options, .feature-hub-heading, .feature-content',
-    );
-    let observer: IntersectionObserver | null = null;
-    if (!reducedMotion.matches && revealTargets?.length && 'IntersectionObserver' in window) {
-      observer = new IntersectionObserver((entries) => entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
-            observer?.unobserve(entry.target);
-          }
-        }), { threshold: 0.08, rootMargin: '0px 0px -5% 0px' });
-    }
-
-    revealTargets?.forEach((target) => {
-      target.classList.add('scroll-reveal');
-      if (observer) observer.observe(target);
-      else target.classList.add('is-visible');
-    });
-
-    return () => observer?.disconnect();
+    return undefined;
   }, [currentPage]);
 
   const navigate = (page: Page) => {
@@ -83,25 +65,23 @@ const App: React.FC = () => {
       {currentPage === 'goals' && <GoalsPage userId={userId} />}
       {currentPage === 'reports' && <ReportsPage userId={userId} />}
       {currentPage === 'profile' && <ProfilePage userId={userId} />}
-      {currentPage === 'payments' && <PaymentsPage userId={userId} />}
+      {currentPage === 'payments' && <PaymentsPage />}
       {currentPage === 'groups' && <GroupSavingsPage userId={userId} />}
       {currentPage === 'bills' && <BillsPage userId={userId} />}
       {currentPage === 'notifications' && <NotificationsPage userId={userId} />}
     </div>
   ) : (
-    <div className="signed-out-state"><h1>Sign in to continue</h1><p>Your demo workspace is ready to use.</p><button className="button-primary" onClick={() => navigate('auth')}>Open sign in</button></div>
+    <div className="signed-out-state"><span className="eyebrow">SIGMAPAY WORKSPACE</span><h1>Sign in to continue</h1><p>Your account gives you access to budgets, goals, bills, and reports.</p><button className="button-primary" onClick={() => navigate('auth')}>Sign in to your account</button></div>
   );
 
   return (
     <div className="app-frame">
-      <div className="ambient-cursor" aria-hidden="true" />
-      <div className="scroll-progress" aria-hidden="true" />
       <a className="skip-link" href="#main-content">Skip to main content</a>
       <Header currentPage={currentPage} onNavigate={navigate} userId={userId} />
       <div className="main-column">
         <header className="topbar">
           <div className="breadcrumb"><span>Workspace</span><span aria-hidden="true">/</span><strong>{pageTitles[currentPage]}</strong></div>
-          <div className="topbar-meta"><span className="local-demo-chip"><span className="demo-chip-icon">D</span> Local demo</span></div>
+          <div className="topbar-meta"><span className="workspace-status"><span className="status-dot" /> Personal workspace</span></div>
         </header>
         <main id="main-content" className="main-content page-transition" key={currentPage}>
           {section}

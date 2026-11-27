@@ -49,20 +49,18 @@ const BillsPage: React.FC<BillsPageProps> = ({ userId }) => {
     setAmount('');
     setDueAt('');
     setRecurring(false);
-    setMessage('Bill saved in this local demo session.');
+    setMessage('Bill saved. This information is held in temporary service storage.');
     await refresh();
   };
 
   const handlePay = async (bill: Bill) => {
     setMessage('');
-    const result = await apiClient.payBill(bill.billId, userId);
-    setMessage(result.message || (result.success ? 'Sandbox payment recorded.' : 'The bill could not be paid.'));
-    if (result.success) await refresh();
+    setMessage('Bill payment is unavailable until a payment provider is connected.');
   };
 
   return (
     <section className="workflow-page" aria-labelledby="bills-title">
-      <div className="module-heading"><div><span className="eyebrow light-eyebrow">PAYMENTS / BILLS</span><h1 id="bills-title">Bills and recurring payments</h1></div><p>Keep due dates visible and set up a schedule for the demo flow.</p></div>
+      <div className="module-heading"><div><span className="eyebrow">PAYMENTS / BILLS</span><h1 id="bills-title">Bills and due dates</h1></div><p>Keep bill details and upcoming due dates organized in one place.</p></div>
       <div className="workflow-grid">
         <form className="workflow-panel bill-form" onSubmit={handleCreate}>
           <div className="panel-heading"><span className="eyebrow">ADD A BILL</span><h2>Bill details</h2></div>
@@ -71,7 +69,7 @@ const BillsPage: React.FC<BillsPageProps> = ({ userId }) => {
           <div className="form-two-column"><label>Amount<input type="number" min="0.01" step="0.01" value={amount} onChange={(event) => setAmount(event.target.value)} required /></label><label>Due date<input type="date" value={dueAt} onChange={(event) => setDueAt(event.target.value)} required /></label></div>
           <label className="check-row"><input type="checkbox" checked={recurring} onChange={(event) => setRecurring(event.target.checked)} />Repeat this bill monthly</label>
           <button className="button-primary" type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save bill'}</button>
-          <p className="form-disclaimer">Payments are simulated. No real provider or bank is contacted.</p>
+          <p className="form-disclaimer">Bill details are held in temporary service storage. Payments require a connected provider.</p>
         </form>
 
         <section className="workflow-panel bill-list" aria-labelledby="bill-list-title">
@@ -84,7 +82,7 @@ const BillsPage: React.FC<BillsPageProps> = ({ userId }) => {
                 <div className="bill-monogram" aria-hidden="true">{bill.provider.slice(0, 1).toUpperCase()}</div>
                 <div className="bill-info"><strong>{bill.provider}</strong><span>{bill.accountRef}</span><small>Due {new Date(bill.dueAt).toLocaleDateString()}</small></div>
                 <div className="bill-value"><strong>{Number(bill.amount).toLocaleString(undefined, { style: 'currency', currency: 'USD' })}</strong><span>{bill.recurring ? 'Monthly' : 'One time'}</span></div>
-                <button className="button-outline" type="button" onClick={() => void handlePay(bill)}>Pay in sandbox</button>
+                <button className="button-outline" type="button" disabled title="Payment provider connection required" onClick={() => void handlePay(bill)}>Payment unavailable</button>
               </li>)}
             </ul>
           )}
